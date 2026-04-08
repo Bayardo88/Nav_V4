@@ -3,6 +3,10 @@
  * Self-contained module: injects CSS, builds the dropdown panel,
  * and attaches it to the .nav-picker (Companies) element.
  *
+ * Clicking a company navigates to company-detail.html?company=NAME
+ * Clicking a submenu item navigates to company-detail.html?company=NAME&tab=TAB
+ * Clicking a level-3 item navigates to   company-detail.html?company=NAME&tab=TAB&subtab=SUBTAB
+ *
  * Depends on: data.js (SCALAR_DB.companies)
  */
 (function () {
@@ -193,6 +197,24 @@
   `;
   document.head.appendChild(style);
 
+  /* ── NAVIGATION HELPER ── */
+  function goToCompany(company, tab, subtab) {
+    const params = new URLSearchParams();
+    if (company) params.set('company', company);
+    if (tab)     params.set('tab',     tab);
+    if (subtab)  params.set('subtab',  subtab);
+    window.location.href = 'company-detail.html?' + params.toString();
+  }
+
+  /* Map dropdown label → tab label used inside company-detail.html */
+  const TAB_MAP = {
+    'Summary':    'Summary',
+    'Financials': 'Financials',
+    'Cap Table':  'Cap Table',
+    'Valuations': 'Valuations',
+    'Waterfalls': 'Waterfall',   /* dropdown says "Waterfalls", page uses "Waterfall" */
+  };
+
   /* ── INIT (run after DOM ready) ── */
   function init() {
     const picker = document.querySelector('.nav-picker');
@@ -263,11 +285,17 @@
       sItem.className = 'cdp-submenu-item';
       sItem.innerHTML = `<span>${si.label}</span>` +
         (si.hasChevron ? `<span class="mi cdp-sub-chevron">chevron_right</span>` : '');
-      sItem.addEventListener('click', e => { e.stopPropagation(); closePanel(); });
+
+      /* navigate to company-detail with the chosen tab */
+      sItem.addEventListener('click', e => {
+        e.stopPropagation();
+        closePanel();
+        goToCompany(activeCompany, TAB_MAP[si.label] || si.label, '');
+      });
 
       /* wire level-3 for items that have sub-definitions */
       if (L3_DEFS[si.label]) {
-        sItem.addEventListener('mouseenter', () => showSubmenu2(sItem, L3_DEFS[si.label]));
+        sItem.addEventListener('mouseenter', () => showSubmenu2(sItem, L3_DEFS[si.label], si.label));
         sItem.addEventListener('mouseleave', scheduleHide2);
       } else {
         sItem.addEventListener('mouseenter', hideSubmenu2);
@@ -287,6 +315,9 @@
     /* ── hover helpers ── */
     let hideTimer  = null;
     let hide2Timer = null;
+
+    /* track which company the user is hovering / last interacted with */
+    let activeCompany = '';
 
     /* level-2 */
     function showSubmenu(anchorItem) {
@@ -308,7 +339,7 @@
     }
 
     /* level-3 — populates with the given items array before showing */
-    function showSubmenu2(anchorItem, items) {
+    function showSubmenu2(anchorItem, items, parentTabLabel) {
       clearTimeout(hide2Timer);
       /* rebuild content */
       submenu2.innerHTML = '';
@@ -316,7 +347,11 @@
         const s2Item = document.createElement('div');
         s2Item.className = 'cdp-submenu-item';
         s2Item.innerHTML = `<span>${label}</span>`;
-        s2Item.addEventListener('click', e => { e.stopPropagation(); closePanel(); });
+        s2Item.addEventListener('click', e => {
+          e.stopPropagation();
+          closePanel();
+          goToCompany(activeCompany, TAB_MAP[parentTabLabel] || parentTabLabel, label);
+        });
         submenu2.appendChild(s2Item);
       });
       const wrapRect = wrapper.getBoundingClientRect();
@@ -379,9 +414,19 @@
         item.className = 'cdp-item';
         item.innerHTML = `<span>${company}</span><span class="mi cdp-chevron">chevron_right</span>`;
 
-        item.addEventListener('mouseenter', () => showSubmenu(item));
+        item.addEventListener('mouseenter', () => {
+          activeCompany = company;   /* remember which company is active */
+          showSubmenu(item);
+        });
         item.addEventListener('mouseleave', scheduleHide);
-        item.addEventListener('click', e => { e.stopPropagation(); closePanel(); });
+
+        /* clicking the company row itself → Summary tab (default) */
+        item.addEventListener('click', e => {
+          e.stopPropagation();
+          closePanel();
+          goToCompany(company, '', '');
+        });
+
         list.appendChild(item);
       });
     }

@@ -1372,9 +1372,39 @@ Let our Ai speed your process</div>
     tab.addEventListener('click', function() { activateSecTab(tab); });
   });
 
-  // Default: activate Summary tab → table-only view
+  // Activate the tab specified in the URL (?tab=), falling back to Summary
+  const tabParam    = params.get('tab');
+  const subtabParam = params.get('subtab');
+
+  const targetSecTab = tabParam
+    ? Array.from(secTabs).find(function(t) { return t.textContent.trim() === tabParam; })
+    : null;
+
   const summaryTab = Array.from(secTabs).find(function(t) { return t.textContent.trim() === 'Summary'; });
-  if (summaryTab) activateSecTab(summaryTab);
+  activateSecTab(targetSecTab || summaryTab);
+
+  // Activate the toolbar sub-tab specified in the URL (?subtab=)
+  if (subtabParam) {
+    const toolbarContainer = document.getElementById('toolbar-tabs-container');
+    const toolbarItems = toolbarContainer.querySelectorAll('.toolbar-tab, .toolbar-tab-active');
+    toolbarItems.forEach(function(tt) {
+      /* strip the "more_horiz" icon text that lives inside .toolbar-tab-active */
+      const ttLabel = tt.textContent.replace('more_horiz', '').trim();
+      if (ttLabel === subtabParam) {
+        /* demote any current active tab */
+        toolbarContainer.querySelectorAll('.toolbar-tab-active').forEach(function(a) {
+          const icon = a.querySelector('.mi');
+          if (icon) icon.remove();
+          a.className = 'toolbar-tab';
+        });
+        /* promote this one */
+        tt.className = 'toolbar-tab-active';
+        tt.insertAdjacentHTML('beforeend',
+          '<span class="mi" style="font-size:14px;color:var(--neutral-600);">more_horiz</span>');
+        tt.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    });
+  }
 
 })();
 </script>
