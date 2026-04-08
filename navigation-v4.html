@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligence - Navigation V4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── PRIMARY NAV ── */
+    .primary-nav {
+      background: var(--brand-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      height: 48px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      width: 34px; height: 32px; border-radius: 4px;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+    .nav-item {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; border-bottom-color: #fff; }
+
+    .nav-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px; cursor: pointer;
+    }
+    .nav-picker span { font-size: 14px; color: var(--neutral-100); }
+
+    .nav-date-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; margin-left: 16px;
+    }
+    .nav-date-picker .lbl { font-size: 14px; color: var(--neutral-300); }
+    .nav-date-picker .val { font-size: 14px; color: var(--brand-400); }
+
+    .nav-search {
+      background: var(--brand-900); border: 1px solid var(--brand-800); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+      cursor: pointer; width: 100px; font-size: 14px; color: var(--neutral-400);
+    }
+
+    .nav-notif {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 8px; cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: #fff;
+    }
+
+    .nav-toggle { background: var(--brand-900); border-radius: 8px; display: flex; padding: 4px; }
+    .toggle-btn {
+      width: 24px; height: 24px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .toggle-btn.active { background: var(--brand-500); }
+
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--brand-500);
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-200));
+      cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: #fff; }
+
+    /* ── BODY ── */
+    .page-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #fff;
+    }
+
+    /* ── INTELLIGENCE HEADER SECTION ── */
+    .section-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .filter-dropdown { position: relative; }
+    .filter-chip {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; color: var(--neutral-700);
+      cursor: pointer; border: none; font-family: var(--font);
+    }
+    .filter-chip:hover { background: var(--neutral-400); }
+    .filter-dropdown.open .filter-chip { background: var(--neutral-400); }
+    .filter-chip .chip-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-panel {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+      background: #fff; border: 1px solid var(--neutral-200); border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px; max-height: 260px; overflow-y: auto; padding: 4px 0;
+    }
+    .filter-dropdown.open .dropdown-panel { display: block; }
+    .dropdown-item {
+      padding: 7px 12px; font-size: 12px; color: var(--neutral-800); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .dropdown-item:hover { background: var(--neutral-50); }
+    .dropdown-item.selected { background: var(--brand-100); color: var(--brand-600); font-weight: 600; }
+    .dropdown-item .check-icon { font-size: 14px; opacity: 0; flex-shrink: 0; }
+    .dropdown-item.selected .check-icon { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--neutral-100); margin: 4px 0; }
+    .dropdown-clear {
+      padding: 7px 12px; font-size: 11px; color: var(--neutral-500);
+      cursor: pointer; font-weight: 600;
+    }
+    .dropdown-clear:hover { color: var(--brand-500); }
+
+    /* ── AI CARD ── */
+    .ai-card {
+      background: var(--neutral-100);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .ai-heading {
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--neutral-800);
+      line-height: 36px;
+    }
+    .ai-input-area {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .ai-input-row {
+      background: #fff;
+      border: 1px solid var(--neutral-200);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+    }
+    .ai-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .ai-placeholder {
+      flex: 1;
+      font-size: 14px;
+      color: var(--neutral-500);
+    }
+    .hit-return-chip {
+      background: var(--neutral-100);
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 10px;
+      color: var(--neutral-400);
+    }
+    .ai-suggestions {
+      display: flex;
+      gap: 4px;
+    }
+    .ai-suggestion-chip {
+      background: var(--neutral-50);
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--neutral-100);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex: 1;
+    }
+    .stat-thumb {
+      background: #d9d9d9;
+      border-radius: 4px;
+      width: 56px;
+      align-self: stretch;
+      flex-shrink: 0;
+    }
+    .stat-info { display: flex; flex-direction: column; }
+    .stat-label {
+      font-size: 14px;
+      color: var(--grey-600);
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--dark-900);
+      line-height: 32px;
+    }
+
+    /* ── TABLE SECTION ── */
+    .table-section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tertiary-menu {
+      background: var(--neutral-100);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 4px;
+      border-radius: 8px 8px 0 0;
+    }
+    .tab-items {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    .tab-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      cursor: pointer;
+      background: var(--neutral-300);
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .tab-add {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      cursor: pointer;
+    }
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .currency-selector {
+      display: flex;
+      align-items: center;
+    }
+    .currency-box {
+      background: #fff;
+      border: 1px solid var(--neutral-200);
+      padding: 2px 4px;
+      border-radius: 4px 0 0 4px;
+      font-size: 10px;
+      color: var(--green-400);
+      font-weight: 400;
+    }
+    .amount-box {
+      background: var(--neutral-200);
+      border: 1px solid var(--neutral-200);
+      padding: 2px 4px;
+      border-radius: 0 4px 4px 0;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .icon-btn {
+      background: var(--neutral-100);
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .save-btn {
+      background: var(--green-400);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 4px 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* ── DATA TABLE ── */
+    .data-table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--neutral-200);
+      border-top: none;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1200px;
+      font-size: 12px;
+    }
+    thead tr {
+      background: #fff;
+    }
+    th {
+      padding: 8px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-700);
+      border-bottom: 1px solid var(--neutral-200);
+      border-right: 1px solid var(--neutral-200);
+      white-space: nowrap;
+    }
+    th:last-child { border-right: none; color: var(--brand-500); font-weight: 400; }
+    td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--neutral-200);
+      border-right: 1px solid var(--neutral-200);
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    td:last-child { border-right: none; }
+    tbody tr:hover { background: var(--neutral-50); }
+
+    .td-company { font-weight: 600; color: var(--brand-500); }
+    .td-company.parent { color: var(--text-primary); font-weight: 600; }
+    .td-company.child { color: var(--brand-500); padding-left: 20px; }
+    .td-fund { color: var(--neutral-600); }
+
+    .row-expand {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .expand-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--neutral-200);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--neutral-600);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .total-row td {
+      font-weight: 600;
+      background: var(--neutral-50);
+      color: var(--text-primary);
+    }
+    .total-row td:first-child { color: var(--text-primary); }
+
+    /* icon helpers */
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════ PRIMARY NAVIGATION ════════════ -->
+<nav class="primary-nav">
+  <a class="nav-logo" href="index.html">t</a>
+
+  <div class="nav-left">
+    <a class="nav-item active" href="navigation-v4.html">Intelligence</a>
+    <a class="nav-item" href="valuations.html">Valuations</a>
+    <a class="nav-item" href="waterfalls.html">Waterfalls</a>
+    <a class="nav-item" href="documents.html">Documents</a>
+    <a class="nav-item" href="reports.html">Reports</a>
+
+    <div class="nav-picker">
+      <span class="mi">store</span>
+      <span>Companies</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </div>
+
+    <div class="nav-date-picker">
+      <span class="lbl">Measurement Date</span>
+      <span class="val">Most Recent</span>
+      <span class="mi mi-24">keyboard_arrow_down</span>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="mi">search</span>
+      cmd + K
+    </div>
+    <div class="nav-notif">
+      <span class="mi">notifications</span>
+      <div class="notif-badge">6</div>
+    </div>
+    <div class="nav-toggle">
+      <div class="toggle-btn active">
+        <span class="mi">list_alt</span>
+      </div>
+      <div class="toggle-btn">
+        <span class="mi">grid_view</span>
+      </div>
+    </div>
+    <div class="nav-avatar"></div>
+    <div class="nav-more">
+      <span class="mi mi-24">more_vert</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════ PAGE BODY ════════════ -->
+<main class="page-body">
+
+  <!-- ── INTELLIGENCE HEADER + AI CARD ── -->
+  <div class="section-header">
+    <!-- Title row -->
+    <div class="section-title-row">
+      <span class="section-title">Intelligence</span>
+      <div class="filter-dropdown" id="dd-firm-int">
+        <button class="filter-chip" onclick="toggleDD('dd-firm-int')">
+          <span class="chip-label" id="lbl-firm-int">Filter by Firm</span>
+          <span class="mi">keyboard_arrow_down</span>
+        </button>
+        <div class="dropdown-panel" id="panel-firm-int"></div>
+      </div>
+
+      <div class="filter-dropdown" id="dd-fund-int">
+        <button class="filter-chip" onclick="toggleDD('dd-fund-int')">
+          <span class="chip-label" id="lbl-fund-int">Filter by Fund</span>
+          <span class="mi">keyboard_arrow_down</span>
+        </button>
+        <div class="dropdown-panel" id="panel-fund-int"></div>
+      </div>
+    </div>
+
+    <!-- AI card -->
+    <div class="ai-card">
+      <p class="ai-heading">We value your time.<br>Let our Ai speed your process</p>
+
+      <div class="ai-input-area">
+        <div class="ai-input-row">
+          <!-- AI sparkle icon -->
+          <span class="mi mi-20">auto_awesome</span>
+          <span class="ai-placeholder">How can I help you?</span>
+          <span class="hit-return-chip">Hit Return</span>
+        </div>
+        <div class="ai-suggestions">
+          <span class="ai-suggestion-chip">Ai Suggestion</span>
+          <span class="ai-suggestion-chip">Ai Suggestion</span>
+          <span class="ai-suggestion-chip">Ai Suggestion</span>
+          <span class="ai-suggestion-chip">Ai Suggestion</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STATS ROW ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-thumb"></div>
+      <div class="stat-info">
+        <span class="stat-label">Fund Name Value</span>
+        <span class="stat-value">$2,350,404</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-thumb"></div>
+      <div class="stat-info">
+        <span class="stat-label">Fund Name Value</span>
+        <span class="stat-value">$2,350,404</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-thumb"></div>
+      <div class="stat-info">
+        <span class="stat-label">Fund Name Value</span>
+        <span class="stat-value">$2,350,404</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-thumb"></div>
+      <div class="stat-info">
+        <span class="stat-label">Fund Name Value</span>
+        <span class="stat-value">$2,350,404</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-thumb"></div>
+      <div class="stat-info">
+        <span class="stat-label">Fund Name Value</span>
+        <span class="stat-value">$2,350,404</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TABLE SECTION ── -->
+  <div class="table-section">
+    <!-- Tertiary Menu -->
+    <div class="tertiary-menu">
+      <div class="tab-items">
+        <div class="tab-item">
+          Summary
+          <span class="mi">more_vert</span>
+        </div>
+        <div class="tab-add">
+          <span class="mi">add</span>
+        </div>
+      </div>
+
+      <div class="table-actions">
+        <div class="currency-selector">
+          <span class="currency-box">USD</span>
+          <span class="amount-box">($) Thousands</span>
+        </div>
+        <div class="icon-btn" title="Fit screen">
+          <span class="mi">fit_screen</span>
+        </div>
+        <div class="icon-btn" title="Filter">
+          <span class="mi">filter_list</span>
+        </div>
+        <div class="save-btn">
+          Save
+          <span class="mi">keyboard_arrow_down</span>
+        </div>
+        <div class="icon-btn" title="More">
+          <span class="mi">more_vert</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:185px">Firm Portfolio Summary</th>
+            <th style="width:160px">
+              All Funds
+              <span class="mi" style="vertical-align:middle;margin-left:2px;font-size:10px">keyboard_arrow_down</span>
+            </th>
+            <th>Valuation Date</th>
+            <th>Initial Investment</th>
+            <th>Most Recent Inv...</th>
+            <th>FDO %</th>
+            <th>Invested Capital</th>
+            <th>Invested Capital</th>
+            <th>Invested Capital</th>
+            <th>Invested Capital</th>
+            <th>Invested Capital</th>
+            <th>+ Add Column</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Regular row -->
+          <tr>
+            <td class="td-company">6.4.3 regression</td>
+            <td class="td-fund">Berkshire Hathaway</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>30.0%</td>
+            <td>$9,000,000</td><td>$8,000,000</td><td>$8,000,000</td><td>$9,000,000</td><td>$9,000,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company">ARAMCO Company</td>
+            <td class="td-fund">Fund XIII</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>3.8%</td>
+            <td>$17,000,000</td><td>$17,000,000</td><td>$17,000,000</td><td>$17,000,000</td><td>$17,000,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company">Airbus SAS</td>
+            <td class="td-fund">Berkshire Hathaway</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>0.8%</td>
+            <td>$2</td><td>$2</td><td>$2</td><td>$2</td><td>$2</td>
+            <td></td>
+          </tr>
+          <!-- Expandable parent -->
+          <tr>
+            <td class="td-company parent">
+              <span class="row-expand">
+                <span class="expand-icon ms">remove</span>
+                Autopopulate Volatility Company
+              </span>
+            </td>
+            <td class="td-fund">Berkshire Hathaway</td>
+            <td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td>
+            <td>24.6%</td>
+            <td>$65,000,000</td><td>$65,000,000</td><td>$65,000,000</td><td>$65,000,000</td><td>$65,000,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Autopopulate Volatility Company</td>
+            <td class="td-fund">Berkshire Hathaway</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>8.2%</td>
+            <td>$16,943,000</td><td>$16,943,000</td><td>$16,943,000</td><td>$16,943,000</td><td>$16,943,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Autopopulate Volatility Company</td>
+            <td class="td-fund">Fake Fund</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>0.0%</td>
+            <td>$10,000,000</td><td>$10,000,000</td><td>$10,000,000</td><td>$10,000,000</td><td>$10,000,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Autopopulate Volatility Company</td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>16.4%</td>
+            <td>$25,000,000</td><td>$25,000,000</td><td>$25,000,000</td><td>$25,000,000</td><td>$25,000,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company">BTCHoldings (CAD)</td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>0.0%</td>
+            <td>$167,000,000</td><td>$167,000,000</td><td>$167,000,000</td><td>$167,000,000</td><td>$167,000,000</td>
+            <td></td>
+          </tr>
+          <!-- Backsolve - expandable -->
+          <tr>
+            <td class="td-company parent" style="font-weight:600">
+              <span class="row-expand">
+                <span class="expand-icon ms">add</span>
+                Backsolve Calculation
+              </span>
+            </td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td>
+            <td>13.0%</td>
+            <td>$14,500,000</td><td>$14,600,000</td><td>$14,700,000</td><td>$14,800,000</td><td>$14,900,000</td>
+            <td></td>
+          </tr>
+          <!-- Berkshire - expandable -->
+          <tr>
+            <td class="td-company parent" style="font-weight:600">
+              <span class="row-expand">
+                <span class="expand-icon ms">remove</span>
+                Berkshire Hathaway
+              </span>
+            </td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td>
+            <td>32.3%</td>
+            <td>$54,000,000</td><td>$54,100,000</td><td>$54,200,000</td><td>$54,300,000</td><td>$54,500,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Berkshire Hathaway</td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>32.3%</td>
+            <td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Berkshire Hathaway</td>
+            <td class="td-fund">Property and Stakes 1</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>32.3%</td>
+            <td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td><td>$53,947,000</td>
+            <td></td>
+          </tr>
+          <!-- Blackstone -->
+          <tr>
+            <td class="td-company parent" style="font-weight:600">
+              <span class="row-expand">
+                <span class="expand-icon ms">add</span>
+                Blackstone, Inc
+              </span>
+            </td>
+            <td class="td-fund">Berkshire Hathaway</td>
+            <td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td>
+            <td>21.5%</td>
+            <td>$95,000,000</td><td>$97,000,000</td><td>$98,000,000</td><td>$99,000,000</td><td>$100,000,000</td>
+            <td></td>
+          </tr>
+          <!-- Cap Table -->
+          <tr>
+            <td class="td-company parent" style="font-weight:600">
+              <span class="row-expand">
+                <span class="expand-icon ms">add</span>
+                Cap Table and Fund Ownershi...
+              </span>
+            </td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td><td style="font-weight:600">11/3/2025</td>
+            <td>1.7%</td>
+            <td>$12,500,000</td><td>$12,550,000</td><td>$12,600,000</td><td>$12,750,000</td><td>$12,800,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor A: 30%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$12,600,000</td><td>$12,650,000</td><td>$12,800,000</td><td>$12,850,000</td><td>$12,850,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor B: 25%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$12,700,000</td><td>$12,750,000</td><td>$12,800,000</td><td>$12,850,000</td><td>$12,950,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor C: 20%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$12,800,000</td><td>$12,850,000</td><td>$13,000,000</td><td>$12,700,000</td><td>$13,050,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor D: 15%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$12,900,000</td><td>$12,950,000</td><td>$13,000,000</td><td>$12,700,000</td><td>$13,150,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor E: 5%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$13,000,000</td><td>$13,050,000</td><td>$13,100,000</td><td>$13,150,000</td><td>$13,250,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor F: 3%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$13,000,000</td><td>$13,150,000</td><td>$13,200,000</td><td>$13,050,000</td><td>$13,300,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor F: 3%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$13,000,000</td><td>$13,150,000</td><td>$13,200,000</td><td>$13,050,000</td><td>$13,300,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor F: 3%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$13,100,000</td><td>$13,400,000</td><td>$13,600,000</td><td>$13,800,000</td><td>$13,500,000</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="td-company child">Investor F: 3%</td>
+            <td class="td-fund">Fund XIII / Property and Stakes</td>
+            <td>11/3/2025</td><td>11/3/2025</td><td>11/3/2025</td>
+            <td>1.7%</td>
+            <td>$13,800,000</td><td>$14,000,000</td><td>$14,500,000</td><td>$14,100,000</td><td>$14,800,000</td>
+            <td></td>
+          </tr>
+          <!-- Total row -->
+          <tr class="total-row">
+            <td>Total</td>
+            <td></td>
+            <td></td><td></td><td></td><td></td>
+            <td>$13,200,000</td><td>$13,250,000</td><td>$13,300,000</td><td>$12,900,000</td><td>$13,450,000</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script src="data.js"></script>
+<script>
+  /* ── ACTIVE FILTER STATE ── */
+  const activeFilters = { firm: null, fund: null };
+
+  /* ── ASSIGN firm/fund to every table row ── */
+  (function assignRowData() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, i) => {
+      row.dataset.firm = SCALAR_DB.firms[i % SCALAR_DB.firms.length];
+      row.dataset.fund = SCALAR_DB.funds[(i + 4) % SCALAR_DB.funds.length];
+    });
+  })();
+
+  /* ── FILTER ── */
+  function applyFilters() {
+    document.querySelectorAll('tbody tr').forEach(row => {
+      const firmOk = !activeFilters.firm || row.dataset.firm === activeFilters.firm;
+      const fundOk = !activeFilters.fund || row.dataset.fund === activeFilters.fund;
+      row.style.display = (firmOk && fundOk) ? '' : 'none';
+    });
+  }
+
+  /* ── DROPDOWN BUILDER ── */
+  function buildDropdown(panelId, lblId, items, placeholder, filterKey) {
+    const panel = document.getElementById(panelId);
+    const lbl   = document.getElementById(lblId);
+
+    const clear = document.createElement('div');
+    clear.className = 'dropdown-clear';
+    clear.textContent = 'All ' + placeholder.replace('Filter by ', '') + 's';
+    clear.onclick = () => {
+      activeFilters[filterKey] = null;
+      lbl.textContent = placeholder;
+      panel.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+      closeAll(); applyFilters();
+    };
+    panel.appendChild(clear);
+    panel.appendChild(Object.assign(document.createElement('div'), { className: 'dropdown-divider' }));
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item';
+      el.innerHTML = `<span class="mi check-icon">check</span>${item}`;
+      el.onclick = () => {
+        activeFilters[filterKey] = item;
+        lbl.textContent = item;
+        panel.querySelectorAll('.dropdown-item').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        closeAll(); applyFilters();
+      };
+      panel.appendChild(el);
+    });
+  }
+
+  function toggleDD(id) {
+    const el = document.getElementById(id);
+    const wasOpen = el.classList.contains('open');
+    closeAll();
+    if (!wasOpen) el.classList.add('open');
+  }
+
+  function closeAll() {
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.filter-dropdown')) closeAll();
+  });
+
+  buildDropdown('panel-firm-int', 'lbl-firm-int', SCALAR_DB.firms, 'Filter by Firm', 'firm');
+  buildDropdown('panel-fund-int', 'lbl-fund-int', SCALAR_DB.funds, 'Filter by Fund', 'fund');
+</script>
+<script src="companies-dropdown.js"></script>
+</body>
+</html>

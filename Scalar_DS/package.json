@@ -1,0 +1,27 @@
+{
+  "name": "@scalar/design-system",
+  "version": "1.0.0",
+  "description": "Scalar Design System - Design tokens matching Figma variable structure",
+  "main": "tokens/index.ts",
+  "types": "tokens/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "scalar",
+    "figma"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.2.0"
+  }
+}
+

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Companies – Scalar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-neutral-white);
+      color: var(--color-neutral-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── MATERIAL ICONS ── */
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-18 { font-size: 18px; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+
+    /* ── PRIMARY NAV ── */
+    .primary-nav {
+      background: var(--color-brand-700);
+      display: flex; align-items: center; gap: var(--spacing-s);
+      padding: var(--spacing-s) var(--spacing-m); height: 48px;
+      position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+    }
+    .nav-logo {
+      width: 34px; height: 32px; border-radius: var(--radius-xs);
+      background: var(--color-neutral-white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: var(--font-weight-bold); color: var(--color-brand-700); flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-right { display: flex; align-items: center; gap: var(--spacing-s); margin-left: auto; }
+    .nav-item {
+      padding: var(--spacing-s); font-size: var(--font-size-s); font-weight: var(--font-weight-semibold);
+      color: var(--color-brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none; display: inline-flex;
+    }
+    .nav-item:hover { color: var(--color-neutral-white); }
+    .nav-item.active { color: var(--color-neutral-white); border-bottom-color: var(--color-neutral-white); }
+    .nav-picker {
+      background: var(--color-brand-900); border-radius: var(--radius-s);
+      display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-s); cursor: pointer;
+    }
+    .nav-picker span { font-size: var(--font-size-m); color: var(--color-neutral-100); }
+    .nav-date-picker {
+      background: var(--color-brand-900); border-radius: var(--radius-s);
+      display: flex; align-items: center; gap: var(--spacing-s); padding: var(--spacing-xs) var(--spacing-s); cursor: pointer; margin-left: var(--spacing-m);
+    }
+    .nav-date-picker .lbl { font-size: var(--font-size-m); color: var(--color-neutral-300); }
+    .nav-date-picker .val { font-size: var(--font-size-m); color: var(--color-brand-400); }
+    .nav-search {
+      background: var(--color-brand-900); border: 1px solid var(--color-brand-800); border-radius: var(--radius-s);
+      display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-s);
+      cursor: pointer; width: 100px; font-size: var(--font-size-m); color: var(--color-neutral-400);
+    }
+    .nav-notif {
+      background: var(--color-brand-900); border-radius: var(--radius-s);
+      display: flex; align-items: center; padding: var(--spacing-s); cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--color-red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: var(--color-neutral-white);
+    }
+    .nav-toggle { background: var(--color-brand-900); border-radius: var(--radius-s); display: flex; padding: var(--spacing-xs); }
+    .toggle-btn { width: 24px; height: 24px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .toggle-btn.active { background: var(--color-brand-500); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--color-brand-500);
+      background: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-200)); cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: var(--color-neutral-white); }
+
+    /* ── SECONDARY TAB BAR ── */
+    .secondary-bar {
+      border-bottom: 1px solid var(--color-neutral-200);
+      display: flex; align-items: center;
+      padding: 0 var(--spacing-m); height: 36px; flex-shrink: 0;
+      gap: 0;
+    }
+    .sec-tab {
+      padding: var(--spacing-s); font-size: var(--font-size-s); font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-500); cursor: pointer; white-space: nowrap;
+      border-radius: var(--radius-xs); display: flex; align-items: center; gap: var(--spacing-xs);
+    }
+    .sec-tab:hover { color: var(--color-neutral-700); }
+    .sec-tab.active {
+      background: var(--color-neutral-300); color: var(--color-neutral-900);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; gap: var(--spacing-s);
+      padding: var(--spacing-m) var(--spacing-m) 12px; flex-shrink: 0;
+    }
+    .page-title { font-size: var(--font-size-l); font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); white-space: nowrap; }
+    .header-spacer { flex: 1; }
+
+    /* ── FILTER DROPDOWNS ── */
+    .filter-dropdown { position: relative; }
+    .filter-chip {
+      background: var(--color-neutral-200); border-radius: var(--radius-xs);
+      display: flex; align-items: center; gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-s); font-size: var(--font-size-s); color: var(--color-neutral-700); cursor: pointer;
+      border: none; font-family: var(--font-family);
+    }
+    .filter-chip:hover { background: var(--color-neutral-300); }
+    .filter-dropdown.open .filter-chip { background: var(--color-neutral-300); }
+    .filter-chip .chip-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-panel {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+      background: var(--color-neutral-white); border: 1px solid var(--color-neutral-200); border-radius: var(--radius-s);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px; max-height: 260px; overflow-y: auto; padding: 4px 0;
+    }
+    .filter-dropdown.open .dropdown-panel { display: block; }
+    .dropdown-item {
+      padding: 7px 12px; font-size: var(--font-size-s); color: var(--color-neutral-800); cursor: pointer;
+      display: flex; align-items: center; gap: var(--spacing-s); white-space: nowrap;
+    }
+    .dropdown-item:hover { background: var(--color-neutral-50); }
+    .dropdown-item.selected { background: var(--color-brand-100); color: var(--color-brand-600); font-weight: var(--font-weight-semibold); }
+    .dropdown-item .check-icon { font-size: 14px; opacity: 0; flex-shrink: 0; }
+    .dropdown-item.selected .check-icon { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--color-neutral-100); margin: 4px 0; }
+    .dropdown-clear {
+      padding: 7px 12px; font-size: var(--font-size-xs); color: var(--color-neutral-500); cursor: pointer;
+      font-weight: var(--font-weight-semibold); letter-spacing: 0.2px;
+    }
+    .dropdown-clear:hover { color: var(--color-brand-500); }
+
+    /* ── PIN BUTTON ── */
+    .pin-btn {
+      background: var(--color-neutral-300); border-radius: var(--radius-xs);
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--spacing-xs); cursor: pointer; flex-shrink: 0;
+    }
+    .pin-btn:hover { background: var(--color-neutral-400); }
+
+    /* ── COMPANIES GRID ── */
+    .companies-grid-wrap {
+      flex: 1; padding: 0 var(--spacing-m) var(--spacing-l); overflow-y: auto;
+    }
+    .companies-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: var(--spacing-s);
+    }
+
+    /* ── COMPANY CARD ── */
+    .company-card {
+      background: var(--color-neutral-100);
+      border-radius: var(--radius-s);
+      padding: var(--spacing-s);
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      min-height: 148px;
+      cursor: pointer;
+      transition: box-shadow 0.15s ease;
+    }
+    .company-card:hover {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .company-card-name {
+      font-size: var(--font-size-m); font-weight: var(--font-weight-regular);
+      color: var(--color-neutral-500);
+      line-height: var(--line-height-m);
+      word-break: break-word;
+    }
+    .company-card-chips {
+      display: flex; flex-direction: column; gap: var(--spacing-xs);
+      align-items: flex-start;
+    }
+    .fund-chip {
+      background: var(--color-neutral-500);
+      color: var(--color-neutral-100);
+      font-size: var(--font-size-xs); font-weight: var(--font-weight-regular);
+      line-height: var(--line-height-xs);
+      padding: 2px var(--spacing-xs);
+      border-radius: var(--radius-xs);
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── EMPTY STATE ── */
+    .companies-empty {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 60px 20px; color: var(--color-neutral-400);
+    }
+    .companies-empty .mi { font-size: 40px; }
+    .companies-empty p { font-size: var(--font-size-m); }
+    .companies-empty button {
+      font-size: var(--font-size-s); font-weight: var(--font-weight-semibold); color: var(--color-brand-500);
+      background: none; border: none; cursor: pointer; font-family: var(--font-family);
+    }
+    .companies-empty button:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- ── PRIMARY NAV ── -->
+  <nav class="primary-nav">
+    <a class="nav-logo" href="index.html">t</a>
+    <div class="nav-left">
+      <a class="nav-item" href="navigation-v4.html">Intelligence</a>
+      <a class="nav-item" href="valuations.html">Valuations</a>
+      <a class="nav-item" href="waterfalls.html">Waterfalls</a>
+      <a class="nav-item" href="documents.html">Documents</a>
+      <a class="nav-item" href="reports.html">Reports</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-picker">
+        <span class="mi">store</span>
+        <span>Companies</span>
+        <span class="mi">expand_more</span>
+      </div>
+      <div class="nav-date-picker">
+        <span class="lbl">Measurement Date</span>
+        <span class="val">Most Recent</span>
+        <span class="mi">expand_more</span>
+      </div>
+      <div class="nav-search">
+        <span class="mi">search</span>
+        <span>cmd + K</span>
+      </div>
+      <div class="nav-notif">
+        <span class="mi">notifications</span>
+        <div class="notif-badge">6</div>
+      </div>
+      <div class="nav-toggle">
+        <div class="toggle-btn active"><span class="mi">table_rows</span></div>
+        <div class="toggle-btn"><span class="mi">grid_view</span></div>
+      </div>
+      <div class="nav-avatar"></div>
+      <div class="nav-more"><span class="mi mi-24">more_vert</span></div>
+    </div>
+  </nav>
+
+  <!-- ── PAGE HEADER ── -->
+  <div class="page-header">
+    <span class="page-title">Companies</span>
+
+    <!-- Filter by Fund -->
+    <div class="filter-dropdown" id="dd-fund-co">
+      <button class="filter-chip" onclick="toggleDD('dd-fund-co')">
+        <span class="mi">filter_list</span>
+        <span class="chip-label" id="lbl-fund-co">Filter by Fund</span>
+        <span class="mi">expand_more</span>
+      </button>
+      <div class="dropdown-panel" id="panel-fund-co"></div>
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <!-- Pin button -->
+    <div class="pin-btn" id="pinBtn"
+         data-pin-id="companies"
+         data-pin-label="Companies"
+         data-pin-href="companies.html"
+         title="Pin to Homepage">
+      <span class="mi">push_pin</span>
+    </div>
+  </div>
+
+  <!-- ── COMPANIES GRID ── -->
+  <div class="companies-grid-wrap">
+    <div class="companies-grid" id="companiesGrid"></div>
+    <div class="companies-empty" id="companiesEmpty">
+      <span class="mi">domain_disabled</span>
+      <p>No companies match the current filters.</p>
+      <button onclick="clearAllFilters()">Clear filters</button>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTS ── -->
+  <script src="data.js"></script>
+  <script>
+    /* ── FILTER DROPDOWNS ── */
+    const activeFilters = { fund: null };
+
+    function toggleDD(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains('open');
+      document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+      if (!isOpen) el.classList.add('open');
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.filter-dropdown')) {
+        document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+      }
+    });
+
+    function buildDropdown(panelId, lblId, items, placeholder, filterKey) {
+      const panel = document.getElementById(panelId);
+      panel.innerHTML = '';
+
+      const clearEl = document.createElement('div');
+      clearEl.className = 'dropdown-clear';
+      clearEl.textContent = 'ALL';
+      clearEl.addEventListener('click', () => {
+        activeFilters[filterKey] = null;
+        document.getElementById(lblId).textContent = placeholder;
+        panel.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+        clearEl.style.color = 'var(--brand-500)';
+        applyFilters();
+        document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+      });
+      panel.appendChild(clearEl);
+
+      const div = document.createElement('div'); div.className = 'dropdown-divider';
+      panel.appendChild(div);
+
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'dropdown-item';
+        el.innerHTML = `<span class="mi check-icon">check</span>${item}`;
+        el.addEventListener('click', () => {
+          activeFilters[filterKey] = item;
+          document.getElementById(lblId).textContent = item;
+          panel.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+          el.classList.add('selected');
+          applyFilters();
+          document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+        });
+        panel.appendChild(el);
+      });
+    }
+
+    function applyFilters() {
+      let visible = 0;
+      document.querySelectorAll('#companiesGrid .company-card').forEach(card => {
+        const fundMatch = !activeFilters.fund || card.dataset.fund === activeFilters.fund;
+        const show = fundMatch;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      document.getElementById('companiesEmpty').style.display = visible === 0 ? 'flex' : 'none';
+    }
+
+    function clearAllFilters() {
+      activeFilters.fund = null;
+      document.getElementById('lbl-fund-co').textContent = 'Filter by Fund';
+      document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+      applyFilters();
+    }
+
+    /* ── BUILD GRID ── */
+    function buildGrid() {
+      const grid = document.getElementById('companiesGrid');
+      const companies = SCALAR_DB.companies;
+      const funds     = SCALAR_DB.funds;
+      const total     = 60;
+
+      for (let i = 0; i < total; i++) {
+        const company = companies[i % companies.length];
+        const fund1   = funds[i % funds.length];
+        const fund2   = funds[(i + 3) % funds.length];
+        const hasTwo  = (i % 4 === 1); // some cards get two chips
+
+        const card = document.createElement('div');
+        card.className = 'company-card';
+        card.dataset.fund = fund1;
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'company-card-name';
+        nameEl.textContent = company;
+        card.appendChild(nameEl);
+
+        const chipsEl = document.createElement('div');
+        chipsEl.className = 'company-card-chips';
+
+        const chip1 = document.createElement('span');
+        chip1.className = 'fund-chip';
+        chip1.textContent = fund1;
+        chipsEl.appendChild(chip1);
+
+        if (hasTwo) {
+          const chip2 = document.createElement('span');
+          chip2.className = 'fund-chip';
+          chip2.textContent = fund2;
+          chipsEl.appendChild(chip2);
+        }
+
+        card.appendChild(chipsEl);
+
+        card.addEventListener('click', () => {
+          window.location.href = 'company-detail.html?company=' + encodeURIComponent(company);
+        });
+
+        grid.appendChild(card);
+      }
+
+      buildDropdown('panel-fund-co', 'lbl-fund-co', funds, 'Filter by Fund', 'fund');
+    }
+
+    buildGrid();
+  </script>
+  <script src="pins.js"></script>
+  <script>
+    /* ── PIN BUTTON ── */
+    (function () {
+      const btn = document.getElementById('pinBtn');
+      const id  = btn.dataset.pinId;
+      const pin = { id, label: btn.dataset.pinLabel, href: btn.dataset.pinHref };
+      function syncBtn() {
+        if (PinManager.has(id)) {
+          btn.style.background = 'var(--brand-500)';
+          btn.querySelector('.mi').style.color = '#fff';
+          btn.title = 'Unpin from Homepage';
+        } else {
+          btn.style.background = '';
+          btn.querySelector('.mi').style.color = '';
+          btn.title = 'Pin to Homepage';
+        }
+      }
+      btn.addEventListener('click', () => { PinManager.toggle(pin); syncBtn(); });
+      syncBtn();
+    })();
+  </script>
+  <script src="companies-dropdown.js"></script>
+</body>
+</html>

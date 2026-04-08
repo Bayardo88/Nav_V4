@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valuations – Scalar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: var(--font); background: #fff; color: var(--neutral-900); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── PRIMARY NAV ── */
+    .primary-nav {
+      background: var(--brand-700);
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; height: 48px;
+      position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+    }
+    .nav-logo {
+      width: 34px; height: 32px; border-radius: 4px;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .nav-item {
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none; display: inline-flex;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; border-bottom-color: #fff; }
+    .nav-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px; cursor: pointer;
+    }
+    .nav-picker span { font-size: 14px; color: var(--neutral-100); }
+    .nav-date-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; margin-left: 16px;
+    }
+    .nav-date-picker .lbl { font-size: 14px; color: var(--neutral-300); }
+    .nav-date-picker .val { font-size: 14px; color: var(--brand-400); }
+    .nav-search {
+      background: var(--brand-900); border: 1px solid var(--brand-800); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+      cursor: pointer; width: 100px; font-size: 14px; color: var(--neutral-400);
+    }
+    .nav-notif {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 8px; cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: #fff;
+    }
+    .nav-toggle { background: var(--brand-900); border-radius: 8px; display: flex; padding: 4px; }
+    .toggle-btn { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .toggle-btn.active { background: var(--brand-500); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--brand-500);
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-200)); cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: #fff; }
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 16px 0; flex-shrink: 0;
+    }
+    .page-title { font-size: 16px; font-weight: 600; color: var(--neutral-900); white-space: nowrap; }
+    .filter-dropdown { position: relative; }
+    .filter-chip {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; color: var(--neutral-700);
+      cursor: pointer; border: none; font-family: var(--font);
+    }
+    .filter-chip:hover { background: var(--neutral-400); }
+    .filter-dropdown.open .filter-chip { background: var(--neutral-400); }
+    .filter-chip .chip-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-panel {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+      background: #fff; border: 1px solid var(--neutral-200); border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px; max-height: 260px; overflow-y: auto; padding: 4px 0;
+    }
+    .filter-dropdown.open .dropdown-panel { display: block; }
+    .dropdown-item {
+      padding: 7px 12px; font-size: 12px; color: var(--neutral-800); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .dropdown-item:hover { background: var(--neutral-50); }
+    .dropdown-item.selected { background: var(--brand-100); color: var(--brand-600); font-weight: 600; }
+    .dropdown-item .check-icon { font-size: 14px; opacity: 0; flex-shrink: 0; }
+    .dropdown-item.selected .check-icon { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--neutral-100); margin: 4px 0; }
+    .dropdown-clear {
+      padding: 7px 12px; font-size: 11px; color: var(--neutral-500);
+      cursor: pointer; font-weight: 600;
+    }
+    .dropdown-clear:hover { color: var(--brand-500); }
+    .header-spacer { flex: 1; }
+    .create-btn {
+      background: var(--green-400); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; font-weight: 600; color: #fff;
+      cursor: pointer; border: none; font-family: var(--font); white-space: nowrap;
+    }
+    .create-btn:hover { opacity: 0.9; }
+    .pin-btn {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 4px; cursor: pointer; flex-shrink: 0;
+    }
+    .pin-btn:hover { background: var(--neutral-400); }
+
+    /* ── TERTIARY MENU (unified tab + toolbar) ── */
+    .tertiary-menu {
+      background: var(--neutral-100);
+      display: flex; align-items: center; gap: 86px;
+      padding: 4px; margin: 8px 16px 0;
+    }
+    .tertiary-tabs { display: flex; align-items: center; flex: 1; }
+    .tab-item {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center;
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--neutral-900); cursor: pointer; white-space: nowrap;
+    }
+    .tab-add {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .tertiary-actions { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .measurements { display: flex; align-items: center; gap: 8px; }
+    .currency-selector { display: flex; align-items: center; }
+    .currency-box {
+      background: #fff; border: 1px solid var(--neutral-200);
+      padding: 2px 4px; border-radius: 4px 0 0 4px;
+      font-size: 10px; color: var(--green-400);
+    }
+    .amount-box {
+      background: var(--neutral-200); padding: 2px 4px;
+      border-radius: 0 4px 4px 0; font-size: 10px; color: var(--neutral-800);
+    }
+    .icon-btn {
+      background: var(--neutral-100); border-radius: 4px;
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    /* Bulk Actions — outlined blue (matches Figma) */
+    .bulk-btn {
+      border: 1px solid var(--brand-500); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px; font-size: 12px; font-weight: 600;
+      color: var(--brand-500); cursor: pointer; background: transparent;
+      font-family: var(--font);
+    }
+    .bulk-btn:hover { background: #e8f3fd; }
+
+    /* ── DATA TABLE ── */
+    .table-wrap { overflow-x: auto; flex: 1; padding: 0 16px 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+
+    thead th {
+      background: #fff; padding: 8px 6px;
+      text-align: left; font-size: 11px; font-weight: 600; color: var(--neutral-600);
+      border-bottom: 2px solid var(--neutral-200); border-right: 1px solid var(--neutral-200);
+      white-space: nowrap; position: sticky; top: 0;
+    }
+    thead th:last-child { border-right: none; }
+    thead th.center { text-align: center; }
+
+    td {
+      padding: 6px 6px; border-bottom: 1px solid var(--neutral-200);
+      border-right: 1px solid var(--neutral-200); font-size: 11px;
+      color: var(--neutral-700); white-space: nowrap; vertical-align: middle;
+    }
+    td:last-child { border-right: none; }
+    tbody tr:hover { background: var(--neutral-50); }
+
+    /* Checkbox col — hidden by default, revealed in bulk-mode */
+    td.col-check, th.col-check {
+      width: 0; min-width: 0; max-width: 0;
+      padding: 0; overflow: hidden;
+      border-right: none;
+      transition: width 0.15s ease, padding 0.15s ease;
+    }
+    table.bulk-mode td.col-check,
+    table.bulk-mode th.col-check {
+      width: 32px; min-width: 32px; max-width: 32px;
+      padding: 6px 4px; border-right: 1px solid var(--neutral-200);
+    }
+    input[type="checkbox"] { width: 13px; height: 13px; cursor: pointer; accent-color: var(--brand-500); }
+
+    /* Bulk Actions active state */
+    .bulk-btn.active {
+      background: var(--brand-500); color: #fff; border-color: var(--brand-500);
+    }
+    /* Company link */
+    td.col-company { color: var(--brand-500); font-size: 12px; min-width: 110px; }
+    td.col-company.has-icon { display: flex; align-items: center; gap: 4px; }
+
+    /* Status badge */
+    .badge-published {
+      background: #dcfce7; color: #15803d;
+      border-radius: 4px; padding: 2px 8px;
+      font-size: 11px; font-weight: 600; display: inline-block;
+    }
+
+    /* Valuation method chips */
+    .chips { display: flex; gap: 3px; flex-wrap: nowrap; }
+    .chip {
+      border-radius: 3px; padding: 1px 5px;
+      font-size: 10px; font-weight: 600; display: inline-block;
+    }
+    .chip-bv  { background: #cffafe; color: #0e7490; }
+    .chip-ev  { background: #dbeafe; color: #1d4ed8; }
+    .chip-opm { background: #dbeafe; color: #1d4ed8; }
+    .chip-cse { background: #ede9fe; color: #6d28d9; }
+    .chip-waterfall { background: #d1fae5; color: #065f46; font-size: 9px; }
+
+    /* Total row */
+    tr.total-row td { font-weight: 700; background: var(--neutral-50); color: var(--neutral-900); }
+
+    /* link col icon */
+    .link-icon { color: var(--neutral-400); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ════════ PRIMARY NAV ════════ -->
+<nav class="primary-nav">
+  <a class="nav-logo" href="index.html">t</a>
+
+  <div class="nav-left">
+    <a class="nav-item" href="index.html">Intelligence</a>
+    <a class="nav-item active">Valuations</a>
+    <a class="nav-item" href="waterfalls.html">Waterfalls</a>
+    <a class="nav-item" href="documents.html">Documents</a>
+    <a class="nav-item" href="reports.html">Reports</a>
+
+    <div class="nav-picker">
+      <span class="mi">store</span>
+      <span>Companies</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </div>
+
+    <div class="nav-date-picker">
+      <span class="lbl">Measurement Date</span>
+      <span class="val">Most Recent</span>
+      <span class="mi mi-24">keyboard_arrow_down</span>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="mi">search</span>
+      cmd + K
+    </div>
+    <div class="nav-notif">
+      <span class="mi">notifications</span>
+      <div class="notif-badge">6</div>
+    </div>
+    <div class="nav-toggle">
+      <div class="toggle-btn active">
+        <span class="mi">list_alt</span>
+      </div>
+      <div class="toggle-btn">
+        <span class="mi">grid_view</span>
+      </div>
+    </div>
+    <div class="nav-avatar"></div>
+    <div class="nav-more">
+      <span class="mi mi-24">more_vert</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ PAGE HEADER ════════ -->
+<div class="page-header">
+  <span class="page-title">Valuations</span>
+
+  <div class="filter-dropdown" id="dd-firm-val">
+    <button class="filter-chip" onclick="toggleDD('dd-firm-val')">
+      <span class="chip-label" id="lbl-firm-val">Filter by Firm</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-firm-val"></div>
+  </div>
+
+  <div class="filter-dropdown" id="dd-fund-val">
+    <button class="filter-chip" onclick="toggleDD('dd-fund-val')">
+      <span class="chip-label" id="lbl-fund-val">Filter by Fund</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-fund-val"></div>
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <button class="create-btn">
+    <span class="mi">add</span>
+    Create New Valuation
+  </button>
+  <div class="pin-btn" id="pinBtn"
+       data-pin-id="valuations"
+       data-pin-label="Valuations"
+       data-pin-href="valuations.html"
+       title="Pin to Homepage">
+    <span class="mi">push_pin</span>
+  </div>
+</div>
+
+<!-- ════════ TERTIARY MENU (Figma 97:11645) ════════ -->
+<div class="tertiary-menu" data-node-id="97:11645">
+  <!-- Left: tabs -->
+  <div class="tertiary-tabs">
+    <div class="tab-item" data-node-id="97:11647">Valuation Summary</div>
+    <div class="tab-add" data-node-id="97:11654">
+      <span class="mi">add</span>
+    </div>
+  </div>
+
+  <!-- Right: measurements + bulk actions -->
+  <div class="tertiary-actions" data-node-id="297:54379">
+    <div class="measurements" data-node-id="97:11663">
+      <!-- USD | ($) Thousands -->
+      <div class="currency-selector" data-node-id="97:11664">
+        <span class="currency-box" data-node-id="97:11665">USD</span>
+        <span class="amount-box" data-node-id="97:11669">($) Thousands</span>
+      </div>
+      <!-- Fit screen icon -->
+      <div class="icon-btn" data-node-id="97:11676" title="Fit screen">
+        <span class="mi">fit_screen</span>
+      </div>
+      <!-- Filter icon -->
+      <div class="icon-btn" data-node-id="97:11677" title="Filter">
+        <span class="mi">filter_list</span>
+      </div>
+    </div>
+
+    <!-- Bulk Actions — outlined blue border (Figma 297:54370) -->
+    <button class="bulk-btn" data-node-id="297:54370">
+      Bulk Actions
+      <span class="mi">more_vert</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════════ DATA TABLE ════════ -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="col-check"><input type="checkbox"/></th>
+        <th>Company</th>
+        <th>Valuation Date</th>
+        <th>Valuation Status</th>
+        <th>Enterprise Valuation</th>
+        <th>Enterprise Value</th>
+        <th>Equity Value</th>
+        <th>Breakeven Equity Enter...</th>
+        <th>Allocation Method</th>
+        <th>Current Fund Valuation</th>
+        <th>% Change from Previous</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Row with BV + EV chip + OPM CSE -->
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">
+          6.4.3 regression
+          <span class="mi link-icon">open_in_new</span>
+        </td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span><span class="chip chip-ev">EV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+
+      <!-- Rows with BV + OPM CSE -->
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span><span class="chip chip-cse">CSE</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+
+      <!-- Row with Waterfall CSE OPM -->
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-waterfall">Waterfall</span><span class="chip chip-cse">CSE</span><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+
+      <!-- Rows with BV + OPM only -->
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span><span class="chip chip-ev">EV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox"/></td>
+        <td class="col-company">6.4.3 regression</td>
+        <td>11/12/2026</td>
+        <td><span class="badge-published">Published</span></td>
+        <td><div class="chips"><span class="chip chip-bv">BV</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td>
+        <td><div class="chips"><span class="chip chip-opm">OPM</span></div></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+
+      <!-- Total row -->
+      <tr class="total-row">
+        <td class="col-check"></td>
+        <td>Total</td>
+        <td></td><td></td><td></td>
+        <td>11/11/30</td><td>11/11/30</td><td>11/11/30</td><td></td>
+        <td>11/11/30</td><td>11/11/30</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const bulkBtn = document.querySelector('.bulk-btn');
+  const dataTable = document.querySelector('table');
+
+  bulkBtn.addEventListener('click', () => {
+    const isActive = dataTable.classList.toggle('bulk-mode');
+    bulkBtn.classList.toggle('active', isActive);
+
+    // Uncheck all boxes when deactivating
+    if (!isActive) {
+      dataTable.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+  });
+</script>
+<script src="data.js"></script>
+<script>
+  /* ── ACTIVE FILTER STATE ── */
+  const activeFilters = { firm: null, fund: null };
+
+  /* ── ASSIGN firm/fund to every table row ── */
+  (function assignRowData() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, i) => {
+      row.dataset.firm = SCALAR_DB.firms[i % SCALAR_DB.firms.length];
+      row.dataset.fund = SCALAR_DB.funds[(i + 2) % SCALAR_DB.funds.length];
+    });
+  })();
+
+  /* ── FILTER ── */
+  function applyFilters() {
+    document.querySelectorAll('tbody tr').forEach(row => {
+      const firmOk = !activeFilters.firm || row.dataset.firm === activeFilters.firm;
+      const fundOk = !activeFilters.fund || row.dataset.fund === activeFilters.fund;
+      row.style.display = (firmOk && fundOk) ? '' : 'none';
+    });
+  }
+
+  /* ── DROPDOWN BUILDER ── */
+  function buildDropdown(panelId, lblId, items, placeholder, filterKey) {
+    const panel = document.getElementById(panelId);
+    const lbl   = document.getElementById(lblId);
+
+    const clear = document.createElement('div');
+    clear.className = 'dropdown-clear';
+    clear.textContent = 'All ' + placeholder.replace('Filter by ', '') + 's';
+    clear.onclick = () => {
+      activeFilters[filterKey] = null;
+      lbl.textContent = placeholder;
+      panel.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+      closeAll(); applyFilters();
+    };
+    panel.appendChild(clear);
+    panel.appendChild(Object.assign(document.createElement('div'), { className: 'dropdown-divider' }));
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item';
+      el.innerHTML = `<span class="mi check-icon">check</span>${item}`;
+      el.onclick = () => {
+        activeFilters[filterKey] = item;
+        lbl.textContent = item;
+        panel.querySelectorAll('.dropdown-item').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        closeAll(); applyFilters();
+      };
+      panel.appendChild(el);
+    });
+  }
+
+  function toggleDD(id) {
+    const el = document.getElementById(id);
+    const wasOpen = el.classList.contains('open');
+    closeAll();
+    if (!wasOpen) el.classList.add('open');
+  }
+
+  function closeAll() {
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.filter-dropdown')) closeAll();
+  });
+
+  buildDropdown('panel-firm-val', 'lbl-firm-val', SCALAR_DB.firms, 'Filter by Firm', 'firm');
+  buildDropdown('panel-fund-val', 'lbl-fund-val', SCALAR_DB.funds, 'Filter by Fund', 'fund');
+</script>
+<script src="pins.js"></script>
+<script src="companies-dropdown.js"></script>
+<script>
+  (function () {
+    const btn  = document.getElementById('pinBtn');
+    const id   = btn.dataset.pinId;
+    const pin  = { id, label: btn.dataset.pinLabel, href: btn.dataset.pinHref };
+
+    function syncBtn() {
+      if (PinManager.has(id)) {
+        btn.style.background = 'var(--brand-500)';
+        btn.querySelector('.mi').style.color = '#fff';
+        btn.title = 'Unpin from Homepage';
+      } else {
+        btn.style.background = '';
+        btn.querySelector('.mi').style.color = '';
+        btn.title = 'Pin to Homepage';
+      }
+    }
+
+    btn.addEventListener('click', () => { PinManager.toggle(pin); syncBtn(); });
+    syncBtn();
+  })();
+</script>
+</body>
+</html>

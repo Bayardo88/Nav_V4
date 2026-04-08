@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documents – Scalar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: var(--neutral-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── MATERIAL ICONS ── */
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-18 { font-size: 18px; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+
+    /* ── PRIMARY NAV ── */
+    .primary-nav {
+      background: var(--brand-700);
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; height: 48px;
+      position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+    }
+    .nav-logo {
+      width: 34px; height: 32px; border-radius: 4px;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .nav-item {
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none; display: inline-flex;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; border-bottom-color: #fff; }
+    .nav-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px; cursor: pointer;
+    }
+    .nav-picker span { font-size: 14px; color: var(--neutral-100); }
+    .nav-date-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; margin-left: 16px;
+    }
+    .nav-date-picker .lbl { font-size: 14px; color: var(--neutral-300); }
+    .nav-date-picker .val { font-size: 14px; color: var(--brand-400); }
+    .nav-search {
+      background: var(--brand-900); border: 1px solid var(--brand-800); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+      cursor: pointer; width: 100px; font-size: 14px; color: var(--neutral-400);
+    }
+    .nav-notif {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 8px; cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: #fff;
+    }
+    .nav-toggle { background: var(--brand-900); border-radius: 8px; display: flex; padding: 4px; }
+    .toggle-btn { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .toggle-btn.active { background: var(--brand-500); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--brand-500);
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-200)); cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: #fff; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 16px 12px; flex-shrink: 0;
+    }
+    .page-title { font-size: 16px; font-weight: 600; color: var(--neutral-900); white-space: nowrap; }
+    /* ── FILTER DROPDOWNS ── */
+    .filter-dropdown { position: relative; }
+    .filter-chip {
+      background: var(--neutral-200); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; color: var(--neutral-700); cursor: pointer;
+      border: none; font-family: var(--font);
+    }
+    .filter-chip:hover { background: var(--neutral-300); }
+    .filter-dropdown.open .filter-chip {
+      background: var(--neutral-300);
+    }
+    .filter-chip .chip-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-panel {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+      background: #fff; border: 1px solid var(--neutral-200); border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px; max-height: 260px; overflow-y: auto;
+      padding: 4px 0;
+    }
+    .filter-dropdown.open .dropdown-panel { display: block; }
+    .dropdown-item {
+      padding: 7px 12px; font-size: 12px; color: var(--neutral-800); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .dropdown-item:hover { background: var(--neutral-50); }
+    .dropdown-item.selected { background: var(--brand-100); color: var(--brand-600); font-weight: 600; }
+    .dropdown-item .check-icon { font-size: 14px; opacity: 0; flex-shrink: 0; }
+    .dropdown-item.selected .check-icon { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--neutral-100); margin: 4px 0; }
+    .dropdown-clear {
+      padding: 7px 12px; font-size: 11px; color: var(--neutral-500); cursor: pointer;
+      font-weight: 600; letter-spacing: 0.2px;
+    }
+    .dropdown-clear:hover { color: var(--brand-500); }
+    .header-spacer { flex: 1; }
+
+    /* Action buttons */
+    .btn-outlined {
+      border: 1px solid var(--brand-500); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; font-size: 12px; font-weight: 600;
+      color: var(--brand-500); cursor: pointer; background: transparent;
+      font-family: var(--font); white-space: nowrap;
+    }
+    .btn-outlined:hover { background: #e8f3fd; }
+    .btn-filled {
+      background: var(--brand-500); border: 1px solid var(--brand-500); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; font-size: 12px; font-weight: 600;
+      color: #fff; cursor: pointer; font-family: var(--font); white-space: nowrap;
+    }
+    .btn-filled:hover { background: var(--brand-600); }
+    .btn-green {
+      background: var(--green-400); border: 1px solid var(--green-400); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; font-size: 12px; font-weight: 600;
+      color: #fff; cursor: pointer; font-family: var(--font); white-space: nowrap;
+    }
+    .btn-green:hover { background: var(--green-600); border-color: var(--green-600); }
+    .pin-btn {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 4px; cursor: pointer; flex-shrink: 0;
+    }
+    .pin-btn:hover { background: var(--neutral-400); }
+
+    /* ── DOCUMENT GRID ── */
+    .docs-grid-wrap {
+      flex: 1; padding: 0 16px 24px; overflow-y: auto;
+    }
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+    }
+
+    /* ── DOCUMENT CARD ── */
+    .doc-card {
+      border: 1px solid var(--neutral-200); border-radius: 6px;
+      display: flex; flex-direction: column;
+      overflow: hidden; cursor: pointer; background: #fff;
+      transition: box-shadow 0.15s ease;
+    }
+    .doc-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: var(--neutral-300); }
+
+    /* Card preview area */
+    .doc-preview {
+      flex: 1; min-height: 80px;
+      background: var(--neutral-50);
+      display: flex; flex-direction: column;
+      align-items: flex-start; padding: 8px 8px 4px;
+      gap: 4px; position: relative;
+    }
+
+    /* File type badge */
+    .file-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 3px; padding: 1px 4px;
+      font-size: 8px; font-weight: 700; letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+    .badge-pdf  { background: #ef4444; color: #fff; }
+    .badge-xlsx { background: #16a34a; color: #fff; }
+    .badge-docx { background: #2563eb; color: #fff; }
+    .badge-wrd  { background: #2563eb; color: #fff; }
+    .badge-ai   { background: #7c3aed; color: #fff; }
+
+    .doc-name {
+      font-size: 10px; color: var(--neutral-700); line-height: 1.3;
+      word-break: break-word;
+    }
+
+    /* Card footer */
+    .doc-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 6px;
+      border-top: 1px solid var(--neutral-100);
+      background: #fff;
+    }
+    .company-chip {
+      background: var(--neutral-800); border-radius: 3px;
+      padding: 1px 6px; font-size: 9px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 80px;
+    }
+    .download-icon {
+      color: var(--neutral-400); flex-shrink: 0; cursor: pointer;
+    }
+    .download-icon:hover { color: var(--brand-500); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 64px 24px; color: var(--neutral-500); text-align: center;
+    }
+    .empty-state p { font-size: 13px; }
+    .empty-state button {
+      padding: 6px 16px; border-radius: 4px; border: 1px solid var(--brand-500);
+      color: var(--brand-500); background: transparent; font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: var(--font);
+    }
+    .empty-state button:hover { background: #e8f3fd; }
+
+    /* Special card for the animated/AI one */
+    .doc-preview.ai-preview {
+      background: linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%);
+    }
+    .ai-preview-icon {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%);
+      color: var(--brand-500); opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ PRIMARY NAV ════════ -->
+<nav class="primary-nav">
+  <a class="nav-logo" href="index.html">t</a>
+
+  <div class="nav-left">
+    <a class="nav-item" href="navigation-v4.html">Intelligence</a>
+    <a class="nav-item" href="valuations.html">Valuations</a>
+    <a class="nav-item" href="waterfalls.html">Waterfalls</a>
+    <a class="nav-item active" href="documents.html">Documents</a>
+    <a class="nav-item" href="reports.html">Reports</a>
+
+    <div class="nav-picker">
+      <span class="mi">store</span>
+      <span>Companies</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </div>
+
+    <div class="nav-date-picker">
+      <span class="lbl">Measurement Date</span>
+      <span class="val">Most Recent</span>
+      <span class="mi mi-24">keyboard_arrow_down</span>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="mi">search</span>
+      cmd + K
+    </div>
+    <div class="nav-notif">
+      <span class="mi">notifications</span>
+      <div class="notif-badge">6</div>
+    </div>
+    <div class="nav-toggle">
+      <div class="toggle-btn active">
+        <span class="mi">list_alt</span>
+      </div>
+      <div class="toggle-btn">
+        <span class="mi">grid_view</span>
+      </div>
+    </div>
+    <div class="nav-avatar"></div>
+    <div class="nav-more">
+      <span class="mi mi-24">more_vert</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ PAGE HEADER ════════ -->
+<div class="page-header">
+  <span class="page-title">Documents</span>
+
+  <div class="filter-dropdown" id="dd-firm-docs">
+    <button class="filter-chip" onclick="toggleDD('dd-firm-docs')">
+      <span class="chip-label" id="lbl-firm-docs">Filter by Firm</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-firm-docs"></div>
+  </div>
+
+  <div class="filter-dropdown" id="dd-fund-docs">
+    <button class="filter-chip" onclick="toggleDD('dd-fund-docs')">
+      <span class="chip-label" id="lbl-fund-docs">Filter by Fund</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-fund-docs"></div>
+  </div>
+
+  <div class="filter-dropdown" id="dd-company-docs">
+    <button class="filter-chip" onclick="toggleDD('dd-company-docs')">
+      <span class="chip-label" id="lbl-company-docs">Filter by Company</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-company-docs"></div>
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <button class="btn-outlined">
+    <span class="mi">article</span>
+    Request Document
+  </button>
+  <button class="btn-filled">
+    <span class="mi">upload</span>
+    Upload Document
+  </button>
+  <button class="btn-green">
+    Request Information
+  </button>
+  <div class="pin-btn" id="pinBtn"
+       data-pin-id="documents"
+       data-pin-label="Documents"
+       data-pin-href="documents.html"
+       title="Pin to Homepage">
+    <span class="mi">push_pin</span>
+  </div>
+</div>
+
+<!-- ════════ DOCUMENTS GRID ════════ -->
+<div class="docs-grid-wrap">
+  <div class="docs-grid" id="docsGrid"></div>
+  <div class="empty-state" id="docsEmpty" style="display:none">
+    <span class="mi mi-24" style="color:var(--neutral-400)">folder_off</span>
+    <p>No documents match the selected filters.</p>
+    <button onclick="clearAllFilters()">Clear filters</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+  /* ── ACTIVE FILTER STATE ── */
+  const activeFilters = { firm: null, fund: null, company: null };
+
+  /* ── FILTER FUNCTION ── */
+  function applyFilters() {
+    const cards = document.querySelectorAll('#docsGrid .doc-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const firmOk    = !activeFilters.firm    || card.dataset.firm    === activeFilters.firm;
+      const fundOk    = !activeFilters.fund    || card.dataset.fund    === activeFilters.fund;
+      const companyOk = !activeFilters.company || card.dataset.company === activeFilters.company;
+      const show = firmOk && fundOk && companyOk;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('docsEmpty').style.display = visible === 0 ? 'flex' : 'none';
+  }
+
+  function clearAllFilters() {
+    activeFilters.firm = activeFilters.fund = activeFilters.company = null;
+    ['lbl-firm-docs','lbl-fund-docs','lbl-company-docs'].forEach((id, i) => {
+      document.getElementById(id).textContent = ['Filter by Firm','Filter by Fund','Filter by Company'][i];
+    });
+    document.querySelectorAll('.dropdown-item.selected').forEach(el => el.classList.remove('selected'));
+    applyFilters();
+  }
+
+  /* ── DROPDOWN BUILDER ── */
+  function buildDropdown(panelId, lblId, items, placeholder, filterKey) {
+    const panel = document.getElementById(panelId);
+    const lbl   = document.getElementById(lblId);
+
+    const clear = document.createElement('div');
+    clear.className = 'dropdown-clear';
+    clear.textContent = 'All ' + placeholder.replace('Filter by ', '') + 's';
+    clear.onclick = () => {
+      activeFilters[filterKey] = null;
+      lbl.textContent = placeholder;
+      panel.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+      closeAll();
+      applyFilters();
+    };
+    panel.appendChild(clear);
+
+    panel.appendChild(Object.assign(document.createElement('div'), { className: 'dropdown-divider' }));
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item';
+      el.innerHTML = `<span class="mi check-icon">check</span>${item}`;
+      el.onclick = () => {
+        activeFilters[filterKey] = item;
+        lbl.textContent = item;
+        panel.querySelectorAll('.dropdown-item').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        closeAll();
+        applyFilters();
+      };
+      panel.appendChild(el);
+    });
+  }
+
+  function toggleDD(id) {
+    const el = document.getElementById(id);
+    const wasOpen = el.classList.contains('open');
+    closeAll();
+    if (!wasOpen) el.classList.add('open');
+  }
+
+  function closeAll() {
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.filter-dropdown')) closeAll();
+  });
+
+  buildDropdown('panel-firm-docs',    'lbl-firm-docs',    SCALAR_DB.firms,     'Filter by Firm',    'firm');
+  buildDropdown('panel-fund-docs',    'lbl-fund-docs',    SCALAR_DB.funds,     'Filter by Fund',    'fund');
+  buildDropdown('panel-company-docs', 'lbl-company-docs', SCALAR_DB.companies, 'Filter by Company', 'company');
+
+  /* ── GRID GENERATION ── */
+  const grid = document.getElementById('docsGrid');
+
+  function pick(arr, i) { return arr[i % arr.length]; }
+
+  function badgeHTML(type) {
+    switch (type) {
+      case 'xlsx': return `<span class="file-badge badge-xlsx">XLSX</span>`;
+      case 'docx': return `<div class="xlsx-icon" style="background:#2563eb"><span class="mi" style="font-size:13px;color:#fff">description</span></div>`;
+      case 'wrd':  return `<span class="file-badge badge-wrd">WRD</span>`;
+      case 'ai':   return `<span class="file-badge badge-ai">AI</span>`;
+      default:     return `<span class="file-badge badge-pdf">PDF</span>`;
+    }
+  }
+
+  function ext(type) {
+    return ({ xlsx: '.xlsx', docx: '.docx', wrd: '.wrd', ai: '.pdf' })[type] || '.pdf';
+  }
+
+  const docs      = SCALAR_DB.documents;
+  const firms     = SCALAR_DB.firms;
+  const funds     = SCALAR_DB.funds;
+  const companies = SCALAR_DB.companies;
+  const TOTAL     = 70;
+
+  for (let i = 0; i < TOTAL; i++) {
+    const doc     = docs[i % docs.length];
+    const company = pick(companies, i + 3);
+    const firm    = pick(firms,     i + 1);
+    const fund    = pick(funds,     i + 7);
+    const aiCard  = (i === 15);
+    const type    = aiCard ? 'ai' : doc.type;
+    const fname   = doc.name + ext(type);
+
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+    card.dataset.firm    = firm;
+    card.dataset.fund    = fund;
+    card.dataset.company = company;
+    card.innerHTML = `
+      <div class="doc-preview${aiCard ? ' ai-preview' : ''}">
+        ${aiCard
+          ? `<span class="file-badge badge-ai">AI</span><span class="doc-name">${fname}</span><span class="mi mi-24 ai-preview-icon">auto_awesome</span>`
+          : `${badgeHTML(type)}<span class="doc-name">${fname}</span>`
+        }
+      </div>
+      <div class="doc-footer">
+        <span class="company-chip" title="${company}">${company}</span>
+        <span class="mi download-icon">cloud_download</span>
+      </div>`;
+    grid.appendChild(card);
+  }
+</script>
+<script src="pins.js"></script>
+<script src="companies-dropdown.js"></script>
+<script>
+  (function () {
+    const btn  = document.getElementById('pinBtn');
+    const id   = btn.dataset.pinId;
+    const pin  = { id, label: btn.dataset.pinLabel, href: btn.dataset.pinHref };
+
+    function syncBtn() {
+      if (PinManager.has(id)) {
+        btn.style.background = 'var(--brand-500)';
+        btn.querySelector('.mi').style.color = '#fff';
+        btn.title = 'Unpin from Homepage';
+      } else {
+        btn.style.background = '';
+        btn.querySelector('.mi').style.color = '';
+        btn.title = 'Pin to Homepage';
+      }
+    }
+
+    btn.addEventListener('click', () => { PinManager.toggle(pin); syncBtn(); });
+    syncBtn();
+  })();
+</script>
+</body>
+</html>

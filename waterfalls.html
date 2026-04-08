@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waterfalls – Scalar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: var(--neutral-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 48px; /* space for bottom sheet */
+    }
+
+    /* ── MATERIAL ICONS ── */
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-18 { font-size: 18px; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+
+    /* ── PRIMARY NAV ── */
+    .primary-nav {
+      background: var(--brand-700);
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; height: 48px;
+      position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+    }
+    .nav-logo {
+      width: 34px; height: 32px; border-radius: 4px;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; }
+    .nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .nav-item {
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none; display: inline-flex;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; border-bottom-color: #fff; }
+    .nav-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px; cursor: pointer;
+    }
+    .nav-picker span { font-size: 14px; color: var(--neutral-100); }
+    .nav-date-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; margin-left: 16px;
+    }
+    .nav-date-picker .lbl { font-size: 14px; color: var(--neutral-300); }
+    .nav-date-picker .val { font-size: 14px; color: var(--brand-400); }
+    .nav-search {
+      background: var(--brand-900); border: 1px solid var(--brand-800); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+      cursor: pointer; width: 100px; font-size: 14px; color: var(--neutral-400);
+    }
+    .nav-notif {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 8px; cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: #fff;
+    }
+    .nav-toggle { background: var(--brand-900); border-radius: 8px; display: flex; padding: 4px; }
+    .toggle-btn { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .toggle-btn.active { background: var(--brand-500); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--brand-500);
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-200)); cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: #fff; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 16px 0; flex-shrink: 0;
+    }
+    .page-title { font-size: 16px; font-weight: 600; color: var(--neutral-900); white-space: nowrap; }
+    .filter-dropdown { position: relative; }
+    .filter-chip {
+      background: var(--neutral-200); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; color: var(--neutral-700); cursor: pointer;
+      border: none; font-family: var(--font);
+    }
+    .filter-chip:hover { background: var(--neutral-300); }
+    .filter-dropdown.open .filter-chip { background: var(--neutral-300); }
+    .filter-chip .chip-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-panel {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+      background: #fff; border: 1px solid var(--neutral-200); border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px; max-height: 260px; overflow-y: auto; padding: 4px 0;
+    }
+    .filter-dropdown.open .dropdown-panel { display: block; }
+    .dropdown-item {
+      padding: 7px 12px; font-size: 12px; color: var(--neutral-800); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .dropdown-item:hover { background: var(--neutral-50); }
+    .dropdown-item.selected { background: var(--brand-100); color: var(--brand-600); font-weight: 600; }
+    .dropdown-item .check-icon { font-size: 14px; opacity: 0; flex-shrink: 0; }
+    .dropdown-item.selected .check-icon { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--neutral-100); margin: 4px 0; }
+    .dropdown-clear {
+      padding: 7px 12px; font-size: 11px; color: var(--neutral-500);
+      cursor: pointer; font-weight: 600;
+    }
+    .dropdown-clear:hover { color: var(--brand-500); }
+    .header-spacer { flex: 1; }
+    /* Create Waterfalls — brand-500 blue (not green) */
+    .create-btn {
+      background: var(--brand-500); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; font-size: 12px; font-weight: 600; color: #fff;
+      cursor: pointer; border: none; font-family: var(--font); white-space: nowrap;
+    }
+    .create-btn:hover { background: var(--brand-600); }
+    .pin-btn {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 4px; cursor: pointer; flex-shrink: 0;
+    }
+    .pin-btn:hover { background: var(--neutral-400); }
+
+    /* ── TERTIARY MENU ── */
+    .tertiary-menu {
+      background: var(--neutral-100);
+      display: flex; align-items: center;
+      padding: 4px; margin: 8px 16px 0;
+    }
+    .tertiary-tabs { display: flex; align-items: center; flex: 1; gap: 2px; }
+    .tab-item {
+      background: var(--neutral-300); border-radius: 4px;
+      display: flex; align-items: center;
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--neutral-900); cursor: pointer; white-space: nowrap;
+    }
+    .tab-add {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      color: var(--neutral-600);
+    }
+    .tertiary-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .icon-btn {
+      background: var(--neutral-100); border-radius: 4px;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--neutral-600);
+    }
+    .icon-btn:hover { background: var(--neutral-200); }
+    /* Save Notes & Documents — green split button */
+    .save-btn {
+      background: var(--green-400); border-radius: 4px;
+      display: flex; align-items: center;
+      font-size: 12px; font-weight: 600; color: #fff;
+      cursor: pointer; border: none; font-family: var(--font); white-space: nowrap;
+      overflow: hidden;
+    }
+    .save-btn-label {
+      padding: 6px 10px;
+    }
+    .save-btn-arrow {
+      padding: 6px 6px;
+      border-left: 1px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center;
+    }
+    .save-btn:hover { filter: brightness(0.95); }
+
+    /* ── SCENARIO MODE BANNER ── */
+    .scenario-banner {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 4px;
+      margin: 8px 16px 0;
+      padding: 8px 12px;
+    }
+    .scenario-banner .bolt-icon {
+      color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .scenario-banner .scenario-label {
+      font-size: 12px; font-weight: 700; color: #92400e;
+      white-space: nowrap;
+    }
+    .scenario-banner .scenario-msg {
+      font-size: 12px; color: #78350f; flex: 1;
+    }
+    .reset-btn {
+      background: #fbbf24; border-radius: 4px;
+      border: none; padding: 4px 12px;
+      font-size: 12px; font-weight: 600; color: #78350f;
+      cursor: pointer; font-family: var(--font); white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .reset-btn:hover { background: #f59e0b; }
+
+    /* ── DATA TABLE ── */
+    .table-wrap { overflow-x: auto; flex: 1; padding: 0 16px 8px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+
+    thead th {
+      background: #fff; padding: 8px 6px;
+      text-align: left; font-size: 11px; font-weight: 600; color: var(--neutral-600);
+      border-bottom: 2px solid var(--neutral-200); border-right: 1px solid var(--neutral-200);
+      white-space: nowrap; position: sticky; top: 0;
+    }
+    thead th:last-child { border-right: none; }
+
+    td {
+      padding: 6px 6px; border-bottom: 1px solid var(--neutral-200);
+      border-right: 1px solid var(--neutral-200); font-size: 11px;
+      color: var(--neutral-700); white-space: nowrap; vertical-align: middle;
+    }
+    td:last-child { border-right: none; }
+    tbody tr:hover { background: var(--neutral-50); }
+
+    /* Company name link styling */
+    td.col-company a {
+      color: var(--brand-500); text-decoration: none; font-size: 12px;
+    }
+    td.col-company a:hover { text-decoration: underline; }
+    td.col-company.col-company-child a {
+      padding-left: 16px;
+    }
+    td.col-company.col-company-investor a {
+      padding-left: 16px;
+    }
+
+    /* Parent row (group header) */
+    tr.group-row td { font-weight: 700; color: var(--neutral-900); background: #fafafa; }
+    tr.group-row td.col-company { color: var(--neutral-900); }
+    tr.group-row td.col-company a { color: var(--brand-500); font-weight: 700; }
+
+    /* Expand / collapse toggle icon in company cell */
+    .expand-icon { color: var(--neutral-500); cursor: pointer; vertical-align: middle; }
+
+    /* All Funds dropdown in header */
+    th .col-filter {
+      display: inline-flex; align-items: center; gap: 2px;
+    }
+
+    /* Add Column */
+    th.col-add { color: var(--brand-500); cursor: pointer; text-align: center; width: 40px; }
+
+    /* Total row */
+    tr.total-row td { font-weight: 700; background: var(--neutral-50); color: var(--neutral-900); }
+
+    /* ── BOTTOM SHEET BAR ── */
+    .bottom-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid var(--neutral-200);
+      display: flex; align-items: center;
+      height: 48px;
+      z-index: 200;
+      padding: 0 8px;
+      gap: 0;
+    }
+    .sheet-tabs { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+    .sheet-tab {
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 12px; height: 48px; font-size: 12px;
+      color: var(--neutral-600); cursor: pointer;
+      border-right: 1px solid var(--neutral-200);
+      white-space: nowrap;
+    }
+    .sheet-tab:hover { background: var(--neutral-50); color: var(--neutral-900); }
+    .sheet-tab .mi { font-size: 14px; }
+
+    /* Active document tab */
+    .sheet-doc-tabs { display: flex; align-items: center; flex: 1; overflow: hidden; }
+    .sheet-doc-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 10px; height: 48px;
+      background: var(--brand-100); border-right: 1px solid var(--brand-200);
+      font-size: 11px; font-weight: 600; color: var(--brand-700);
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    }
+    .sheet-doc-tab .mi { font-size: 14px; color: var(--brand-500); }
+    .sheet-doc-tab .close-icon { color: var(--neutral-500); cursor: pointer; }
+    .sheet-doc-tab .close-icon:hover { color: var(--neutral-900); }
+    .sheet-doc-tab .more-icon { color: var(--neutral-400); cursor: pointer; }
+
+    .sheet-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; padding-right: 8px; }
+    .sheet-action-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; cursor: pointer; color: var(--neutral-600);
+    }
+    .sheet-action-btn:hover { background: var(--neutral-100); color: var(--neutral-900); }
+
+  </style>
+</head>
+<body>
+
+<!-- ════════ PRIMARY NAV ════════ -->
+<nav class="primary-nav">
+  <a class="nav-logo" href="index.html">t</a>
+
+  <div class="nav-left">
+    <a class="nav-item" href="navigation-v4.html">Intelligence</a>
+    <a class="nav-item" href="valuations.html">Valuations</a>
+    <a class="nav-item active" href="waterfalls.html">Waterfalls</a>
+    <a class="nav-item" href="documents.html">Documents</a>
+    <a class="nav-item" href="reports.html">Reports</a>
+
+    <div class="nav-picker">
+      <span class="mi">store</span>
+      <span>Companies</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </div>
+
+    <div class="nav-date-picker">
+      <span class="lbl">Measurement Date</span>
+      <span class="val">Most Recent</span>
+      <span class="mi mi-24">keyboard_arrow_down</span>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="mi">search</span>
+      cmd + K
+    </div>
+    <div class="nav-notif">
+      <span class="mi">notifications</span>
+      <div class="notif-badge">6</div>
+    </div>
+    <div class="nav-toggle">
+      <div class="toggle-btn active">
+        <span class="mi">list_alt</span>
+      </div>
+      <div class="toggle-btn">
+        <span class="mi">grid_view</span>
+      </div>
+    </div>
+    <div class="nav-avatar"></div>
+    <div class="nav-more">
+      <span class="mi mi-24">more_vert</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ PAGE HEADER ════════ -->
+<div class="page-header">
+  <span class="page-title">Waterfalls</span>
+
+  <div class="filter-dropdown" id="dd-firm-wat">
+    <button class="filter-chip" onclick="toggleDD('dd-firm-wat')">
+      <span class="chip-label" id="lbl-firm-wat">Filter by Firm</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-firm-wat"></div>
+  </div>
+
+  <div class="filter-dropdown" id="dd-fund-wat">
+    <button class="filter-chip" onclick="toggleDD('dd-fund-wat')">
+      <span class="chip-label" id="lbl-fund-wat">Filter by Fund</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </button>
+    <div class="dropdown-panel" id="panel-fund-wat"></div>
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <button class="create-btn">
+    <span class="mi">add</span>
+    Create Waterfalls
+  </button>
+  <div class="pin-btn" id="pinBtn"
+       data-pin-id="waterfalls"
+       data-pin-label="Waterfalls"
+       data-pin-href="waterfalls.html"
+       title="Pin to Homepage">
+    <span class="mi">push_pin</span>
+  </div>
+</div>
+
+<!-- ════════ TERTIARY MENU ════════ -->
+<div class="tertiary-menu">
+  <!-- Left: tab -->
+  <div class="tertiary-tabs">
+    <div class="tab-item">Waterfalls Summary</div>
+    <div class="tab-add">
+      <span class="mi">add</span>
+    </div>
+  </div>
+
+  <!-- Right: actions -->
+  <div class="tertiary-actions">
+    <div class="icon-btn" title="Fit screen">
+      <span class="mi">fit_screen</span>
+    </div>
+    <div class="icon-btn" title="Filter">
+      <span class="mi">filter_list</span>
+    </div>
+    <button class="save-btn">
+      <span class="save-btn-label">Save Notes &amp; Documents</span>
+      <span class="save-btn-arrow"><span class="mi">keyboard_arrow_down</span></span>
+    </button>
+    <div class="icon-btn" title="More">
+      <span class="mi">more_vert</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SCENARIO MODE ACTIVE BANNER ════════ -->
+<div class="scenario-banner">
+  <span class="mi mi-18 bolt-icon">bolt</span>
+  <span class="scenario-label">Scenario Mode Active</span>
+  <span class="scenario-msg">— Enterprise Values have been overridden to simulate returns. This values are not saved.</span>
+  <button class="reset-btn">Reset Scenario</button>
+</div>
+
+<!-- ════════ DATA TABLE ════════ -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Firm Portfolio Summary</th>
+        <th>
+          <span class="col-filter">
+            All Funds
+            <span class="mi">keyboard_arrow_down</span>
+          </span>
+        </th>
+        <th>Enterpris...</th>
+        <th>Unrealiz...</th>
+        <th>MOIC</th>
+        <th>Gross IRR</th>
+        <th class="col-add"><span class="mi">add</span></th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- 6.4.3 regression -->
+      <tr>
+        <td class="col-company"><a href="#">6.4.3 regression</a></td>
+        <td>Berkshire Hathaway</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>30.0%</td>
+        <td></td>
+      </tr>
+
+      <!-- ARAMCO Company -->
+      <tr>
+        <td class="col-company"><a href="#">ARAMCO Company</a></td>
+        <td>Fund XIII</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>3.8%</td>
+        <td></td>
+      </tr>
+
+      <!-- Airbus SAS -->
+      <tr>
+        <td class="col-company"><a href="#">Airbus SAS</a></td>
+        <td>Berkshire Hathaway</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>0.8%</td>
+        <td></td>
+      </tr>
+
+      <!-- Autopopulate Volatility Company — group parent (expanded) -->
+      <tr class="group-row" id="group-autopopulate">
+        <td class="col-company">
+          <span class="mi expand-icon" onclick="toggleGroup('autopopulate', this)">remove</span>
+          <a href="#">Autopopulate Volatility Company</a>
+        </td>
+        <td><strong>Berkshire Hathaway</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>24.6%</strong></td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-autopopulate">
+        <td class="col-company col-company-child"><a href="#">Autopopulate Volatility Company</a></td>
+        <td>Berkshire Hathaway</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>8.2%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-autopopulate">
+        <td class="col-company col-company-child"><a href="#">Autopopulate Volatility Company</a></td>
+        <td>Fake Fund</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>0.0%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-autopopulate">
+        <td class="col-company col-company-child"><a href="#">Autopopulate Volatility Company</a></td>
+        <td>Property and Stakes 1</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>16.4%</td>
+        <td></td>
+      </tr>
+
+      <!-- BTCHoldings (CAD) -->
+      <tr>
+        <td class="col-company"><a href="#">BTCHoldings (CAD)</a></td>
+        <td>Property and Stakes 1</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>11/3/2025</td>
+        <td>0.0%</td>
+        <td></td>
+      </tr>
+
+      <!-- Backsolve Calculation — group parent (collapsed) -->
+      <tr class="group-row" id="group-backsolve">
+        <td class="col-company">
+          <span class="mi expand-icon" onclick="toggleGroup('backsolve', this)">add</span>
+          <a href="#"><strong>Backsolve Calculation</strong></a>
+        </td>
+        <td><strong>Property and Stakes 1</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>13.0%</strong></td>
+        <td></td>
+      </tr>
+
+      <!-- Berkshire Hathaway — group parent (expanded) -->
+      <tr class="group-row" id="group-berkshire">
+        <td class="col-company">
+          <span class="mi expand-icon" onclick="toggleGroup('berkshire', this)">remove</span>
+          <a href="#">Berkshire Hathaway</a>
+        </td>
+        <td><strong>Property and Stakes 1</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>32.3%</strong></td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-berkshire">
+        <td class="col-company col-company-child"><a href="#">Berkshire Hathaway</a></td>
+        <td>Property and Stakes 1</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>32.3%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-berkshire">
+        <td class="col-company col-company-child"><a href="#">Berkshire Hathaway</a></td>
+        <td>Property and Stakes 1</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>32.3%</td>
+        <td></td>
+      </tr>
+
+      <!-- Blackstone, Inc — group parent (collapsed) -->
+      <tr class="group-row" id="group-blackstone">
+        <td class="col-company">
+          <span class="mi expand-icon" onclick="toggleGroup('blackstone', this)">add</span>
+          <a href="#">Blackstone, Inc</a>
+        </td>
+        <td><strong>Berkshire Hathaway</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>21.5%</strong></td>
+        <td></td>
+      </tr>
+
+      <!-- Cap Table and Fund Ownership — group parent (expanded) -->
+      <tr class="group-row" id="group-captable">
+        <td class="col-company">
+          <span class="mi expand-icon" onclick="toggleGroup('captable', this)">remove</span>
+          <a href="#">Cap Table and Fund Ownershi...</a>
+        </td>
+        <td><strong>Fund XIII / Property and Stakes</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>11/3/2025</strong></td>
+        <td><strong>1.7%</strong></td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor A: 30%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor B: 25%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor C: 20%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor D: 15%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor E: 5%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor F: 3%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor F: 3%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor F: 3%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor F: 3%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+      <tr class="child-row group-captable">
+        <td class="col-company col-company-investor"><a href="#">Investor F: 3%</a></td>
+        <td>Fund XIII / Property and Stakes</td>
+        <td>11/3/2025</td>
+        <td></td>
+        <td></td>
+        <td>1.7%</td>
+        <td></td>
+      </tr>
+
+      <!-- Total row -->
+      <tr class="total-row">
+        <td class="col-company"><strong>Total</strong></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════ BOTTOM SHEET BAR ════════ -->
+<div class="bottom-sheet">
+  <!-- Section tabs -->
+  <div class="sheet-tabs">
+    <div class="sheet-tab">
+      <span class="mi">description</span>
+      Notes
+    </div>
+    <div class="sheet-tab">
+      <span class="mi">table_chart</span>
+      Sheets
+    </div>
+    <div class="sheet-tab">
+      <span class="mi">folder_open</span>
+      Documents
+    </div>
+  </div>
+
+  <!-- Active document tab -->
+  <div class="sheet-doc-tabs">
+    <div class="sheet-doc-tab">
+      <span class="mi">description</span>
+      ABC Startup Co CAP Table 12-31-2024
+      <span class="mi more-icon">more_horiz</span>
+      <span class="mi close-icon">close</span>
+    </div>
+  </div>
+
+  <!-- Right actions -->
+  <div class="sheet-actions">
+    <div class="sheet-action-btn" title="Open in new window">
+      <span class="mi mi-18">open_in_new</span>
+    </div>
+    <div class="sheet-action-btn" title="Expand">
+      <span class="mi mi-18">open_in_full</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle expand/collapse for row groups
+  function toggleGroup(groupName, iconEl) {
+    const rows = document.querySelectorAll('.group-' + groupName);
+    const isExpanded = iconEl.textContent.trim() === 'remove';
+
+    if (isExpanded) {
+      // Collapse
+      rows.forEach(r => r.style.display = 'none');
+      iconEl.textContent = 'add';
+    } else {
+      // Expand
+      rows.forEach(r => r.style.display = '');
+      iconEl.textContent = 'remove';
+    }
+  }
+</script>
+<script src="data.js"></script>
+<script>
+  /* ── ACTIVE FILTER STATE ── */
+  const activeFilters = { firm: null, fund: null };
+
+  /* ── ASSIGN firm/fund to every table row ── */
+  (function assignRowData() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, i) => {
+      row.dataset.firm = SCALAR_DB.firms[i % SCALAR_DB.firms.length];
+      row.dataset.fund = SCALAR_DB.funds[(i + 6) % SCALAR_DB.funds.length];
+    });
+  })();
+
+  /* ── FILTER ── */
+  function applyFilters() {
+    document.querySelectorAll('tbody tr').forEach(row => {
+      const firmOk = !activeFilters.firm || row.dataset.firm === activeFilters.firm;
+      const fundOk = !activeFilters.fund || row.dataset.fund === activeFilters.fund;
+      row.style.display = (firmOk && fundOk) ? '' : 'none';
+    });
+  }
+
+  /* ── DROPDOWN BUILDER ── */
+  function buildDropdown(panelId, lblId, items, placeholder, filterKey) {
+    const panel = document.getElementById(panelId);
+    const lbl   = document.getElementById(lblId);
+
+    const clear = document.createElement('div');
+    clear.className = 'dropdown-clear';
+    clear.textContent = 'All ' + placeholder.replace('Filter by ', '') + 's';
+    clear.onclick = () => {
+      activeFilters[filterKey] = null;
+      lbl.textContent = placeholder;
+      panel.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+      closeAll(); applyFilters();
+    };
+    panel.appendChild(clear);
+    panel.appendChild(Object.assign(document.createElement('div'), { className: 'dropdown-divider' }));
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item';
+      el.innerHTML = `<span class="mi check-icon">check</span>${item}`;
+      el.onclick = () => {
+        activeFilters[filterKey] = item;
+        lbl.textContent = item;
+        panel.querySelectorAll('.dropdown-item').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        closeAll(); applyFilters();
+      };
+      panel.appendChild(el);
+    });
+  }
+
+  function toggleDD(id) {
+    const el = document.getElementById(id);
+    const wasOpen = el.classList.contains('open');
+    closeAll();
+    if (!wasOpen) el.classList.add('open');
+  }
+
+  function closeAll() {
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.filter-dropdown')) closeAll();
+  });
+
+  buildDropdown('panel-firm-wat', 'lbl-firm-wat', SCALAR_DB.firms, 'Filter by Firm', 'firm');
+  buildDropdown('panel-fund-wat', 'lbl-fund-wat', SCALAR_DB.funds, 'Filter by Fund', 'fund');
+</script>
+<script src="pins.js"></script>
+<script src="companies-dropdown.js"></script>
+<script>
+  (function () {
+    const btn  = document.getElementById('pinBtn');
+    const id   = btn.dataset.pinId;
+    const pin  = { id, label: btn.dataset.pinLabel, href: btn.dataset.pinHref };
+
+    function syncBtn() {
+      if (PinManager.has(id)) {
+        btn.style.background = 'var(--brand-500)';
+        btn.querySelector('.mi').style.color = '#fff';
+        btn.title = 'Unpin from Homepage';
+      } else {
+        btn.style.background = '';
+        btn.querySelector('.mi').style.color = '';
+        btn.title = 'Pin to Homepage';
+      }
+    }
+
+    btn.addEventListener('click', () => { PinManager.toggle(pin); syncBtn(); });
+    syncBtn();
+  })();
+</script>
+</body>
+</html>

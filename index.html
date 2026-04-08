@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home – Scalar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <script src="pins.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: var(--neutral-900);
+      min-height: 100vh;
+    }
+
+    /* ─── PRIMARY NAV ─── */
+    .primary-nav {
+      background: var(--brand-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      height: 48px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      width: 34px; height: 32px;
+      border-radius: 4px;
+      background: linear-gradient(135deg,#7c3aed,#db2777);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 700; color: #fff; letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-left  { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+    .nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+    .nav-item {
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--brand-200); cursor: pointer; white-space: nowrap;
+      border-bottom: 1px solid transparent; text-decoration: none;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 4px; padding: 4px 8px; cursor: pointer;
+    }
+    .nav-picker span { font-size: 14px; color: var(--neutral-100); }
+    .nav-date-picker {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; margin-left: 16px;
+    }
+    .nav-date-picker .lbl { font-size: 14px; color: var(--neutral-300); }
+    .nav-date-picker .val { font-size: 14px; color: var(--brand-400); }
+    .nav-search {
+      background: var(--brand-900); border: 1px solid var(--brand-800);
+      border-radius: 8px; display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; cursor: pointer; width: 100px;
+      font-size: 14px; color: var(--neutral-400);
+    }
+    .nav-notif {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 8px; cursor: pointer; position: relative;
+    }
+    .notif-badge {
+      position: absolute; top: 2px; right: 2px; width: 10px; height: 10px;
+      background: var(--red-400); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: #fff; font-weight: 300;
+    }
+    .nav-toggle {
+      background: var(--brand-900); border-radius: 8px;
+      display: flex; align-items: center; padding: 4px;
+    }
+    .toggle-btn {
+      width: 24px; height: 24px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .toggle-btn.active { background: var(--brand-500); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--brand-500);
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-200));
+      cursor: pointer; flex-shrink: 0;
+    }
+    .nav-more {
+      width: 24px; height: 24px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer;
+    }
+    .nav-date-picker .mi, .nav-notif .mi, .nav-toggle .mi, .nav-more .mi, .nav-search .mi { color: #fff; }
+
+    /* ─── TERTIARY / HOME TAB ─── */
+    .tertiary-bar {
+      background: var(--neutral-100);
+      display: flex; align-items: center; gap: 0;
+      padding: 4px; border-bottom: 1px solid var(--neutral-200);
+    }
+    .tab-active {
+      background: var(--neutral-300); border-radius: 4px;
+      padding: 8px; font-size: 12px; font-weight: 600;
+      color: var(--neutral-900); cursor: pointer;
+    }
+    .tab-add {
+      width: 32px; height: 32px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer;
+    }
+    /* Pinned tabs */
+    .tab-pinned {
+      display: flex; align-items: center; gap: 4px;
+      border-radius: 4px; padding: 6px 8px;
+      font-size: 12px; color: var(--neutral-700);
+      cursor: pointer; white-space: nowrap;
+    }
+    .tab-pinned:hover { background: var(--neutral-200); }
+    .tab-pinned a { color: inherit; text-decoration: none; }
+    .tab-pinned .close-pin {
+      font-family: 'Material Icons Outlined'; font-size: 14px; font-style: normal;
+      font-weight: normal; line-height: 1; user-select: none;
+      -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+      color: var(--neutral-400); cursor: pointer; flex-shrink: 0;
+    }
+    .tab-pinned .close-pin:hover { color: var(--neutral-800); }
+
+    /* ─── PAGE BODY ─── */
+    .page-body {
+      background: #fff; padding: 16px;
+      display: flex; justify-content: center;
+    }
+    .content-col {
+      width: 1040px; max-width: 100%;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ─── ROW 1: WELCOME + CHART ─── */
+    .row-two-col { display: flex; gap: 16px; align-items: flex-start; }
+    .col-left  { flex: 0 0 512px; display: flex; flex-direction: column; gap: 113px; }
+    .col-right { flex: 0 0 512px; }
+
+    .welcome-heading {
+      font-size: 32px; font-weight: 700; color: var(--neutral-800); line-height: 40px;
+    }
+
+    .quick-access-card {
+      background: var(--neutral-100); border-radius: 16px;
+      padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden;
+    }
+    .quick-access-card h3 {
+      font-size: 16px; font-weight: 400; color: var(--neutral-500); line-height: 24px;
+    }
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .quick-chip {
+      background: var(--neutral-200); border-radius: 4px;
+      padding: 8px; font-size: 14px; color: var(--neutral-600); cursor: pointer;
+    }
+    .quick-chip:hover { background: var(--neutral-300); }
+
+    /* ─── CHART CARD ─── */
+    .chart-card {
+      background: var(--neutral-100); border-radius: 16px;
+      height: 345px; overflow: hidden; position: relative;
+    }
+    .chart-header {
+      position: absolute; top: 24px; left: 24px; right: 24px;
+      display: flex; align-items: center; gap: 16px; z-index: 2;
+    }
+    .chart-label { font-size: 14px; color: var(--neutral-400); flex: 1; }
+    .chart-trend {
+      display: flex; align-items: center; gap: 2px;
+      font-size: 12px; color: var(--accent-400);
+    }
+    .chart-value {
+      position: absolute; top: 52px; left: 24px;
+      font-size: 32px; font-weight: 700; color: var(--neutral-600); z-index: 2;
+    }
+    /* SVG chart sits in the bottom half */
+    .chart-area {
+      position: absolute; bottom: 0; left: -8px; right: 0;
+      height: 210px;
+    }
+
+    /* ─── ROW 2: 4 STAT CARDS ─── */
+    .stats-row { display: flex; gap: 16px; }
+    .stat-card {
+      background: var(--neutral-100); border-radius: 16px;
+      padding: 16px; display: flex; align-items: flex-start; gap: 16px; flex: 1;
+    }
+    .stat-thumb {
+      background: #d9d9d9; border-radius: 4px;
+      width: 56px; align-self: stretch; flex-shrink: 0;
+    }
+    .stat-label { font-size: 14px; color: var(--grey-600); line-height: 20px; }
+    .stat-value { font-size: 24px; font-weight: 600; color: var(--dark-900); line-height: 32px; }
+
+    /* ─── ROW 3: AI CARD ─── */
+    .ai-card {
+      background: var(--neutral-100); border-radius: 16px;
+      padding: 32px; display: flex; flex-direction: column; gap: 28px;
+    }
+    .ai-heading { font-size: 28px; font-weight: 400; color: var(--neutral-800); line-height: 36px; }
+    .ai-input-row {
+      background: #fff; border: 1px solid var(--neutral-200); border-radius: 8px;
+      display: flex; align-items: center; gap: 16px; padding: 8px;
+    }
+    .ai-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .ai-placeholder { flex: 1; font-size: 14px; color: var(--neutral-500); }
+    .hit-return {
+      background: var(--neutral-100); border-radius: 4px;
+      padding: 2px 4px; font-size: 10px; color: var(--neutral-400);
+    }
+    .ai-suggestions { display: flex; gap: 4px; margin-top: 11px; }
+    .suggestion-chip {
+      background: var(--neutral-50); border-radius: 4px;
+      padding: 2px 4px; font-size: 10px; color: var(--neutral-600); cursor: pointer;
+    }
+
+    /* ─── ROW 4: TODO + EDIT DASHBOARD ─── */
+    .row-bottom { display: flex; gap: 16px; align-items: stretch; }
+    .todo-card {
+      flex: 0 0 512px; background: var(--neutral-100); border-radius: 16px;
+      padding: 16px; display: flex; flex-direction: column; gap: 16px;
+      min-height: 345px;
+    }
+    .todo-header {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .todo-title { font-size: 16px; color: var(--neutral-500); flex: 1; }
+    .todo-list { display: flex; flex-direction: column; gap: 4px; }
+    .todo-item {
+      background: var(--neutral-300); border-radius: 8px;
+      padding: 8px 8px 8px 8px; display: flex; gap: 16px; align-items: flex-start;
+    }
+    .todo-icon {
+      background: #fff; border-radius: 4px;
+      width: 34px; align-self: stretch; flex-shrink: 0;
+    }
+    .todo-name { font-size: 14px; font-weight: 600; color: var(--neutral-900); line-height: 20px; }
+    .todo-desc { font-size: 10px; color: var(--dark-900); line-height: 14px; }
+
+    .edit-card {
+      flex: 1; background: var(--brand-100); border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; padding: 16px; text-align: center;
+    }
+    .edit-card h3 {
+      font-size: 24px; font-weight: 700; color: var(--neutral-900); line-height: 32px;
+    }
+    .edit-btn {
+      background: var(--brand-500); border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px; color: #fff; font-size: 16px; font-weight: 600;
+      cursor: pointer; border: none; font-family: var(--font);
+    }
+    .edit-btn:hover { background: var(--brand-400); }
+
+    /* icon helpers */
+    .mi { font-family: 'Material Icons Outlined'; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+    .mi-20 { font-size: 20px; }
+    .mi-24 { font-size: 24px; }
+  </style>
+</head>
+<body>
+
+<!-- ════════ PRIMARY NAV ════════ -->
+<nav class="primary-nav">
+  <a class="nav-logo" href="index.html">t</a>
+
+  <div class="nav-left">
+    <a class="nav-item" href="navigation-v4.html">Intelligence</a>
+    <a class="nav-item" href="valuations.html">Valuations</a>
+    <a class="nav-item" href="waterfalls.html">Waterfalls</a>
+    <a class="nav-item" href="documents.html">Documents</a>
+    <a class="nav-item" href="reports.html">Reports</a>
+
+    <div class="nav-picker">
+      <span class="mi">store</span>
+      <span>Companies</span>
+      <span class="mi">keyboard_arrow_down</span>
+    </div>
+
+    <div class="nav-date-picker">
+      <span class="lbl">Measurement Date</span>
+      <span class="val">Most Recent</span>
+      <span class="mi mi-24">keyboard_arrow_down</span>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="mi">search</span>
+      cmd + K
+    </div>
+
+    <div class="nav-notif">
+      <span class="mi">notifications</span>
+      <div class="notif-badge">6</div>
+    </div>
+
+    <div class="nav-toggle">
+      <div class="toggle-btn active">
+        <span class="mi">list_alt</span>
+      </div>
+      <div class="toggle-btn">
+        <span class="mi">grid_view</span>
+      </div>
+    </div>
+
+    <div class="nav-avatar"></div>
+
+    <div class="nav-more">
+      <span class="mi mi-24">more_vert</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ TERTIARY / HOME TAB ════════ -->
+<div class="tertiary-bar" id="homeTabs">
+  <div class="tab-active">Home</div>
+  <!-- pinned tabs rendered here by pins.js -->
+  <div class="tab-add">
+    <span class="mi">add</span>
+  </div>
+</div>
+
+<!-- ════════ PAGE BODY ════════ -->
+<main class="page-body">
+  <div class="content-col">
+
+    <!-- ── ROW 1: Welcome + Chart ── -->
+    <div class="row-two-col">
+      <!-- Left: greeting + quick access -->
+      <div class="col-left">
+        <div class="welcome-heading">
+          Welcome<br>&lt;User Name&gt;
+        </div>
+
+        <div class="quick-access-card">
+          <h3>Easy Access to Scalar's Features</h3>
+          <div class="quick-chips">
+            <div class="quick-chip">Fund Name Value</div>
+            <div class="quick-chip">Fund Name Value</div>
+            <div class="quick-chip">Fund Name Value</div>
+            <div class="quick-chip">Fund Name Value</div>
+            <div class="quick-chip">Fund Name Value</div>
+            <div class="quick-chip">Fund Name Value</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Firm Value chart -->
+      <div class="col-right">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-label">Firm Value</span>
+            <div class="chart-trend">
+              <span class="mi mi-20">arrow_drop_up</span>
+              +7.45%
+            </div>
+            <div class="nav-more" style="width:24px;height:24px;">
+              <span class="mi mi-24">more_vert</span>
+            </div>
+          </div>
+          <div class="chart-value">$18,092,124</div>
+
+          <!-- SVG line chart (decorative) -->
+          <div class="chart-area">
+            <svg width="100%" height="100%" viewBox="0 0 535 210" preserveAspectRatio="none" fill="none">
+              <!-- Filled area -->
+              <path d="M0 180 C40 170 60 155 90 140 C120 125 140 100 170 85 C200 70 220 90 250 75 C270 65 285 55 300 60 C330 70 350 100 380 88 C410 76 430 90 460 85 C490 80 510 90 535 88 L535 210 L0 210 Z"
+                    fill="#39d19a" opacity="0.15"/>
+              <!-- Line -->
+              <path d="M0 180 C40 170 60 155 90 140 C120 125 140 100 170 85 C200 70 220 90 250 75 C270 65 285 55 300 60 C330 70 350 100 380 88 C410 76 430 90 460 85 C490 80 510 90 535 88"
+                    stroke="#39d19a" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 2: 4 Stat Cards ── -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-thumb"></div>
+        <div>
+          <div class="stat-label">Fund Name Value</div>
+          <div class="stat-value">$2,350,404</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-thumb"></div>
+        <div>
+          <div class="stat-label">Fund Name Value</div>
+          <div class="stat-value">$2,350,404</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-thumb"></div>
+        <div>
+          <div class="stat-label">Fund Name Value</div>
+          <div class="stat-value">$2,350,404</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-thumb"></div>
+        <div>
+          <div class="stat-label">Fund Name Value</div>
+          <div class="stat-value">$2,350,404</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 3: AI Card ── -->
+    <div class="ai-card">
+      <p class="ai-heading">We value your time.<br>Let our Ai speed your process</p>
+      <div>
+        <div class="ai-input-row">
+          <!-- AI sparkle icon -->
+          <span class="mi mi-20">auto_awesome</span>
+          <span class="ai-placeholder">How can I help you?</span>
+          <span class="hit-return">Hit Return</span>
+        </div>
+        <div class="ai-suggestions">
+          <span class="suggestion-chip">Ai Suggestion</span>
+          <span class="suggestion-chip">Ai Suggestion</span>
+          <span class="suggestion-chip">Ai Suggestion</span>
+          <span class="suggestion-chip">Ai Suggestion</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 4: To-Do List + Edit Dashboard ── -->
+    <div class="row-bottom">
+      <!-- To-Do's List -->
+      <div class="todo-card">
+        <div class="todo-header">
+          <span class="todo-title">To-Do's List</span>
+          <span class="mi mi-24">more_vert</span>
+        </div>
+        <div class="todo-list">
+          <div class="todo-item">
+            <div class="todo-icon"></div>
+            <div>
+              <div class="todo-name">Task Name/Type</div>
+              <div class="todo-desc">Small Task Description</div>
+            </div>
+          </div>
+          <div class="todo-item">
+            <div class="todo-icon"></div>
+            <div>
+              <div class="todo-name">Task Name/Type</div>
+              <div class="todo-desc">Small Task Description</div>
+            </div>
+          </div>
+          <div class="todo-item">
+            <div class="todo-icon"></div>
+            <div>
+              <div class="todo-name">Task Name/Type</div>
+              <div class="todo-desc">Small Task Description</div>
+            </div>
+          </div>
+          <div class="todo-item">
+            <div class="todo-icon"></div>
+            <div>
+              <div class="todo-name">Task Name/Type</div>
+              <div class="todo-desc">Small Task Description</div>
+            </div>
+          </div>
+          <div class="todo-item">
+            <div class="todo-icon"></div>
+            <div>
+              <div class="todo-name">Task Name/Type</div>
+              <div class="todo-desc">Small Task Description</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Dashboard CTA -->
+      <div class="edit-card">
+        <h3>Is there anything else you want to display on your Homescreen?</h3>
+        <button class="edit-btn">
+          <span class="mi mi-24">add_chart</span>
+          Edit Your Dashboard
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function renderPinnedTabs() {
+    const bar    = document.getElementById('homeTabs');
+    const addBtn = bar.querySelector('.tab-add');
+    bar.querySelectorAll('.tab-pinned').forEach(el => el.remove());
+    PinManager.getAll().forEach(pin => {
+      const tab = document.createElement('div');
+      tab.className = 'tab-pinned';
+      tab.innerHTML =
+        `<a href="${pin.href}">${pin.label}</a>` +
+        `<span class="close-pin" onclick="unpinTab(event,'${pin.id}')">close</span>`;
+      bar.insertBefore(tab, addBtn);
+    });
+  }
+
+  function unpinTab(e, id) {
+    e.preventDefault();
+    e.stopPropagation();
+    PinManager.remove(id);
+    renderPinnedTabs();
+  }
+
+  renderPinnedTabs();
+</script>
+<script src="data.js"></script>
+<script src="companies-dropdown.js"></script>
+</body>
+</html>
